@@ -33,6 +33,7 @@
                                     <v-text-field
                                         v-model="editedItem.name"
                                         label="Nombre"
+                                        :rules="nameRules"
                                     ></v-text-field>
                                 </v-col>
                           
@@ -45,7 +46,7 @@
                             <v-btn color="blue darken-1" text @click="close">
                                 Cancelar
                             </v-btn>
-                            <v-btn color="blue darken-1" text @click="save">
+                            <v-btn :disabled="btnSaveDisabled" color="blue darken-1" text @click="save">
                                 Guardar
                             </v-btn>
                         </v-card-actions>
@@ -98,7 +99,10 @@
 <script>
 import Messages from '../../messages/Messages.vue'
 
+import sectionApi from '../../api/sections.js'
+
 export default {
+    props: ['mainSection', 'section'],
     components: {
         Messages
     },
@@ -107,6 +111,7 @@ export default {
             progress: false,
             dialog: false,
             dialogDelete: false,
+            btnSaveDisabled: true,
             headers: [
                 {
                     text: 'Nombre',
@@ -124,6 +129,9 @@ export default {
             defaultItem: {
                 name: '',
             },
+            nameRules: [
+                v => !!v || 'Name is required',
+            ],
         }
     },
     computed: {
@@ -133,6 +141,16 @@ export default {
     },
 
     watch: {
+        'editedItem.name': {
+            handler: function (after, before) {
+                if ( after !== '' ) {
+                    this.btnSaveDisabled = false;
+                } else {
+                     this.btnSaveDisabled = true;
+                }
+            },
+            deep: true
+        },
         dialog (val) {
             val || this.close()
         },
@@ -142,16 +160,36 @@ export default {
     },
 
     created () {
-        this.initialize()
+        
+    },
+
+    mounted()
+    {
+        console.log( "Section mounted()" );
+        console.log( { mainSection: this.mainSection } );
+        this.initialize();
     },
 
     methods: {
-        initialize () {
-        this.desserts = [
-            {
-                name: 'Todo en una',
-            },
-        ]
+        initialize (mainSection, section) {
+            
+            console.log( "section initialize()" );
+            console.log( { mainSection: this.mainSection } );
+            console.log( { section: this.section } );
+            let data = {
+                mainSection: this.mainSection, 
+                section: this.section
+            }
+            this.progress = true;
+            sectionApi.getSections( data )
+            .then( (response) => {
+                console.log( { sections_response: response } );
+               this.progress = false;
+            })
+            .catch( (error) => {
+                console.log( { error: error } );
+                this.progress = false;
+            });
         },
 
         editItem (item) {
@@ -191,7 +229,7 @@ export default {
             if (this.editedIndex > -1) {
                 Object.assign(this.desserts[this.editedIndex], this.editedItem)
             } else {
-                this.desserts.push(this.editedItem)
+                this.store();
             }
             this.close()
         },
@@ -201,6 +239,22 @@ export default {
             this.$router.push({
                 name: 'section', 
                 params: { item: item }
+            });
+        },
+
+        store()
+        {
+            let data = {
+                mainSection: this.mainSection, 
+                section: this.section,
+                item: this.editedItem
+            }
+            sectionApi.store(data)
+            .then( (response) => {
+                console.log( { store_response: response } );
+            })
+            .catch( (error) => {
+                console.log( { store_error: error } );
             });
         }
     },

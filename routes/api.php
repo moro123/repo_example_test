@@ -14,6 +14,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:api')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+Route::post('sections/get-main-section','MainSectionController@getMainSection');
+
+Route::post('sections/get-sections','SectionController@getSections');
+
+Route::resource('sections','SectionController');
