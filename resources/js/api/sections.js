@@ -1,7 +1,12 @@
 import axios from 'axios';
 
-export default 
-{
+export default {
+
+    show(id)
+    {
+        return axios.get('/api/sections/' + id); 
+    },
+        
     getSections(data)
     {
         return axios.post('/api/sections/get-sections', data);
@@ -10,6 +15,16 @@ export default
     store(data)
     {
         return axios.post('/api/sections', data);
+    },
+    
+    update(data, id)
+    {
+        return axios.put('/api/sections/' + id, data);
+    },
+    
+    destroy(id)
+    {
+        return axios.delete('/api/sections/' + id);
     },
 
 }

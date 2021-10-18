@@ -1,4 +1,4 @@
-<template>
+d<template>
     <div id="carousel">
         
         <sections v-if="mainSection != null" :mainSection="mainSection"></sections>

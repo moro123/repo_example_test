@@ -16,7 +16,7 @@ class Section extends Model {
     *
     * @var bool
     */
-    public $timestamps = true;
+    public $timestamps = false;
 
     /**
      * The atributes that are mass assignable

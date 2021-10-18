@@ -37,12 +37,12 @@ class SectionService
 
     public function update(Request $request, $id)
 	{
-		return $this->query->update($id, $request);
+		return $this->query->update($request, $id);
 	}
 
-	public function delete($id)
+	public function destroy($id)
 	{
-		return $this->query->delete($id);
+		return $this->query->destroy($id);
 	}
 }
 ?>

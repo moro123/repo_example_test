@@ -1,11 +1,11 @@
 <template>
     <div id="folder">
 
-        <messages :progress="progress"></messages>
+        <messages ref="messages" :progress="progress"></messages>
 
         <v-data-table
             :headers="headers"
-            :items="desserts"
+            :items="data"
             sort-by="calories"
             class="elevation-1">
 
@@ -108,6 +108,7 @@ export default {
     },
     data() {
         return {
+            error: null,
             progress: false,
             dialog: false,
             dialogDelete: false,
@@ -121,7 +122,7 @@ export default {
                 },
                 { text: 'Actiones', value: 'actions', sortable: false },
             ],
-            desserts: [],
+            data: [],
             editedIndex: -1,
             editedItem: {
                 name: '',
@@ -184,7 +185,8 @@ export default {
             sectionApi.getSections( data )
             .then( (response) => {
                 console.log( { sections_response: response } );
-               this.progress = false;
+                this.progress = false;
+                this.data = response.data;
             })
             .catch( (error) => {
                 console.log( { error: error } );
@@ -193,20 +195,20 @@ export default {
         },
 
         editItem (item) {
-            this.editedIndex = this.desserts.indexOf(item)
+            this.editedIndex = this.data.indexOf(item)
             this.editedItem = Object.assign({}, item)
-            this.dialog = true
+            this.dialog = true;
         },
 
         deleteItem (item) {
-            this.editedIndex = this.desserts.indexOf(item)
+            this.editedIndex = this.data.indexOf(item)
             this.editedItem = Object.assign({}, item)
             this.dialogDelete = true
         },
 
         deleteItemConfirm () {
-            this.desserts.splice(this.editedIndex, 1)
             this.closeDelete()
+            this.destroy();
         },
 
         close () {
@@ -227,7 +229,7 @@ export default {
 
         save () {
             if (this.editedIndex > -1) {
-                Object.assign(this.desserts[this.editedIndex], this.editedItem)
+                this.update();
             } else {
                 this.store();
             }
@@ -236,6 +238,7 @@ export default {
 
         openSection(item)
         {
+            
             this.$router.push({
                 name: 'section', 
                 params: { item: item }
@@ -251,12 +254,82 @@ export default {
             }
             sectionApi.store(data)
             .then( (response) => {
-                console.log( { store_response: response } );
+                this.storeProcess(response);
             })
             .catch( (error) => {
                 console.log( { store_error: error } );
+                this.error = JSON.parse( e.response.data.message);
+        		this.$refs.messages.showAlertError( this.error.title, this.error.message);
             });
-        }
+        },
+
+        storeProcess(response)
+        {
+            if ( response.data === 1 ) {
+                this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento agregado");
+                this.initialize();
+            }
+        },
+
+        update()
+        {
+
+            console.log("update()");
+            console.log( { editedItem: this.editedItem } );
+            let data = {
+                mainSection: this.mainSection, 
+                section: this.section,
+                item: this.editedItem
+            }
+            sectionApi.update(data, this.editedItem.id)
+            .then( (response) => {
+                this.updateProcess(response);
+            })
+            .catch( (error) => {
+                console.log( { store_error: error } );
+                this.error = JSON.parse( e.response.data.message);
+        		this.$refs.messages.showAlertError(this.error.title, this.error.message);
+            });
+        },
+
+        updateProcess(response)
+        {
+            if ( response.data === 1 ) {
+                this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento actualizado");
+                this.initialize();
+            }
+        },
+
+        destroy()
+        {
+            console.log("destroy()");
+            console.log( { editedItem: this.editedItem } );
+            let data = {
+                mainSection: this.mainSection, 
+                section: this.section,
+                item: this.editedItem
+            }
+            sectionApi.destroy(this.editedItem.id)
+            .then( (response) => {
+                this.destroyProcess(response);
+            })
+            .catch( (error) => {
+                console.log( { store_error: error } );
+                this.error = JSON.parse( e.response.data.message);
+        		this.$refs.messages.showAlertError(this.error.title, this.error.message);
+            });
+        },
+
+        destroyProcess(response)
+        {
+            if ( response.data === 1 ) {
+                this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento eliminado");
+                this.initialize();
+            }
+        },
+
+        
+        
     },
 }
 </script>

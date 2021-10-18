@@ -28,12 +28,12 @@ class SectionController extends Controller
 
     public function store(Request $request)
     {
-
         return $this->sectionService->store($request);
     }
 
     public function show($id)
     {
+        return $this->sectionService->show($id);
     }
 
     public function edit($id)
@@ -42,9 +42,11 @@ class SectionController extends Controller
 
     public function update(Request $request, $id)
     {
+        return $this->sectionService->update( $request, $id );
     }
 
     public function destroy($id)
     {
+        return $this->sectionService->destroy( $id );
     }
 }
