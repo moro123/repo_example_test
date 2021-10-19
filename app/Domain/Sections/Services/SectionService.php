@@ -40,6 +40,11 @@ class SectionService
 		return $this->query->update($request, $id);
 	}
 
+    public function updateSection(Request $request)
+	{
+		return $this->query->updateSection($request);
+	}
+
 	public function destroy($id)
 	{
 		return $this->query->destroy($id);

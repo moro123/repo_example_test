@@ -43,13 +43,70 @@ class SectionQuery {
 
     public function update(Request $request, $id)
 	{
-        $name = $request->get('item')['name'];
+        Log::info("SectionQuery update()");
+        Log::info( $request );
+        if ( $request->has('item') ) {
+            $name = $request->get('item')['name'];
 
-        $section = Section::where('id', $id)->first();
-        $section->name = $name;
+            $section = Section::where('id', $id)->first();
+            $section->name = $name;
 
-        return $section->save();
+            return $section->save();
+        }
+
+        
+
+
+        
+
+
 	}
+
+    public function updateSection(Request $request)
+    {
+        $section = $request->all();
+
+        $oldImage = Section::whereId( $section['id'] )->first()->image;
+        $oldVideo = Section::whereId( $section['id'] )->first()->video;
+
+        Section::whereId( $section['id'] )->update( $section );
+
+        $sectionUpdated = Section::find( $section['id'] );
+
+      
+        if ( $request->hasFile('image') ) {
+            if ( $oldImage ) {
+                try {
+					unlink( $oldImage );
+				} catch (\Exception $e) {
+					Log::info($e);
+				}
+            } 
+    
+            $path = $section['image']->store('public');
+            $sectionUpdated->image = str_replace("public","storage", $path);
+            $sectionUpdated->save();
+        }
+
+        if ( $request->hasFile('video') ) {
+
+            if ( $oldVideo ) {
+                try {
+					unlink( $oldVideo );
+				} catch (\Exception $e) {
+					Log::info($e);
+				}
+            } 
+
+            $path = $section['video']->store('public');
+            $sectionUpdated->video = str_replace("public","storage", $path);
+            $sectionUpdated->save();
+        }
+
+        return $sectionUpdated;
+    }
+
+
 
 	public function destroy($id)
 	{

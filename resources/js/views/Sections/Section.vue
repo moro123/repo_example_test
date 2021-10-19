@@ -20,19 +20,53 @@
 
 
         <v-form
-            ref="form"
-            v-model="valid"
-            lazy-validation>
+            ref="form">
 
                 <v-row>
                     <v-col cols="12" md="6">
-                        <v-text-field
-                            v-model="section.date"
-                            label="Fecha"
-                        ></v-text-field>
+
+                        <v-menu
+                            ref="menu"
+                            v-model="menu"
+                            :close-on-content-click="false"
+                            :return-value.sync="section.date"
+                            transition="scale-transition"
+                            offset-y
+                            min-width="auto">
+
+                            <template v-slot:activator="{ on, attrs }">
+
+                                <v-text-field
+                                    class="picker-date"
+                                    v-model="section.date"
+                                    prepend-inner-icon="mdi-calendar"
+                                    append-icon="mdi-chevron-down"
+                                    readonly
+                                    v-bind="attrs"
+                                    v-on="on">
+                                </v-text-field>
+                                    
+                            </template>
+
+                            <v-date-picker
+                                v-model="section.date"
+                                no-title
+                                scrollable
+                                locale="es-ES">
+
+                                <v-spacer></v-spacer>
+                                <v-btn tex color="primary" @click="menu = false"> Cancelar </v-btn>
+                                <v-btn text color="primary" @click="$refs.menu.save(section.date)"> OK </v-btn>
+                            </v-date-picker>
+
+                        </v-menu>
+
+
+    
                     </v-col>
                     <v-col cols="12" md="6">
                         <v-text-field
+                            prepend-icon="mdi-text"
                             v-model="section.header"
                             :counter="10"
                             label="Encabezado"
@@ -43,12 +77,14 @@
                 <v-row>
                     <v-col cols="12" md="6">
                         <v-text-field
+                            prepend-icon="mdi-text"
                             v-model="section.title"
                             label="Titulo"
                         ></v-text-field>
                     </v-col>
                     <v-col cols="12" md="6">
                         <v-text-field
+                            prepend-icon="mdi-text"
                             v-model="section.subtitle"
                             label="Subtitulo"
                         ></v-text-field>
@@ -56,6 +92,7 @@
                 </v-row>
 
                 <v-textarea
+                    prepend-icon="mdi-text"
                     v-model="section.description"
                     name="input-7-1"
                     label="Descripción"
@@ -65,6 +102,7 @@
                 <v-row>
                     <v-col cols="12" md="12">
                         <v-text-field
+                            prepend-icon="mdi-text"
                             v-model="section.legend"
                             label="Video leyenda"
                         ></v-text-field>
@@ -73,17 +111,32 @@
 
                 <v-row>
                     <v-col cols="12" md="6">
+                        <v-img contain :src="section.currentImage" width="320" height="240"> </v-img>
+                    </v-col>
+                    <v-col cols="12" md="6">
+                        <video width="320" height="240" controls>
+                            <source :src="section.currentVideo" type="video/mp4">
+                        </video> 
+                    </v-col>
+                </v-row>
+
+                <v-row>
+                    <v-col cols="12" md="6">
                         <v-file-input
+                        @change="Preview_image"
                         v-model="section.image"
                         accept="image/*"
                         label="Imagen"
+                        
                         ></v-file-input>
                     </v-col>
                     <v-col cols="12" md="6">
                         <v-file-input
+                        @change="Preview_video"
                         v-model="section.video"
                         accept="video/*"
                         label="Video"
+                        
                         ></v-file-input>
                     </v-col>
                 </v-row>
@@ -93,16 +146,11 @@
                 </v-btn>
 
                 <v-btn
-                    :disabled="!valid"
                     color="primary"
                     class="mr-4"
-                    @click="store()">
+                    @click="update()">
                     Guardar
                 </v-btn>
-    
-                <!-- <v-btn color="warning" @click="resetValidation">
-                    Reset Validation
-                </v-btn> -->
 
         </v-form>
 
@@ -131,6 +179,8 @@ export default {
     },
     data() {
         return {
+            host: 'http://investor.admin.sandbox/',
+            menu: false,
             valid: true,
             progress: false,
             section: {
@@ -139,8 +189,8 @@ export default {
                 title: '',
                 subtitle: '',
                 description: '',
-                image: '',
-                video: '',
+                image: [],
+                video: [],
                 date: '',
                 legend: '',
                 link: ''
@@ -162,16 +212,64 @@ export default {
     mounted()
     {
         console.log( { section: this.$route.params } );
-        this.section = this.$route.params.item;
+
+        let section = this.$route.params.item;
+
+        if ( section.image === '' || section.image === '[]' ) {
+            section.image = [];
+        }
+
+        if ( section.image !== '' ){
+            section.currentImage = this.host + section.image;
+            section.image = [];
+        }
+
+        if ( section.video === '' || section.video === '[]' ) {
+            section.video = [];
+        }
+
+        if ( section.video !== '' ) {
+            section.currentVideo =  this.host + section.video;
+            section.video = [];
+        }
+
+        console.log( { SECTION: section } );
+
+        this.section = section;
         
         if( this.section != null ) {
             this.initialize();
         }
     },
 
+    watch: {
+        'section.image': {
+            handler: function (after, before) {
+            },
+            deep: true
+        },
+        'section.video': {
+            handler: function (after, before) {
+                console.log( { video: after } );
+            },
+            deep: true
+        },
+    },
+
     methods: {
+        Preview_image() {
+            if ( this.section.image !== []) {
+                this.section.currentImage = URL.createObjectURL(this.section.image);
+            }
+        },
+        Preview_video() {
+            if ( this.section.video !== []) {
+                this.section.currentVideo = URL.createObjectURL(this.section.video);
+            }
+        },
         initialize()
         {
+            
             this.progress = true;
             sectionApi.show( this.section.id )
             .then( (response) => {
@@ -184,7 +282,9 @@ export default {
             });
         },
 
+ 
         validate () {
+
             this.$refs.form.validate()
         },
         reset () {
@@ -201,28 +301,28 @@ export default {
             });
         },
 
-        store()
+        update()
         {
-            let data = {
-                section: this.section,
-            }
-            sectionApi.store(data)
+            window.scrollTo(0,0);
+            let data = this.section;
+
+            delete data.currentImage;
+            delete data.currentVideo;
+            
+            sectionApi.updateSection( data )
             .then( (response) => {
-                this.storeProcess(response);
+                console.log( { response_store: response } );
+                this.updateProcess(response);
             })
             .catch( (error) => {
                 console.log( { store_error: error } );
-                this.error = JSON.parse( e.response.data.message);
-        		this.$refs.messages.showAlertError( this.error.title, this.error.message);
+        		this.$refs.messages.showAlertError( "Error", error.message);
             });
         },
 
-        storeProcess(response)
+        updateProcess(response)
         {
-            if ( response.data === 1 ) {
-                this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento agregado");
-                this.initialize();
-            }
+            this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento actualizado");
         },
     },
 }

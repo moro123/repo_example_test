@@ -45,6 +45,13 @@ class SectionController extends Controller
         return $this->sectionService->update( $request, $id );
     }
 
+    public function updateSection(Request $request)
+    {
+        return $this->sectionService->updateSection( $request);
+    }
+
+
+
     public function destroy($id)
     {
         return $this->sectionService->destroy( $id );

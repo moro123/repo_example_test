@@ -18,8 +18,10 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
+
 Route::post('sections/get-main-section','MainSectionController@getMainSection');
 
 Route::post('sections/get-sections','SectionController@getSections');
+Route::post('sections/update-section','SectionController@updateSection');
 
 Route::resource('sections','SectionController');
