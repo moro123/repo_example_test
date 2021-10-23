@@ -90,15 +90,15 @@ export default {
                     subLinks : [
                         {
                             title : 'Carousel',
-                            link    : '/principal/carousel',
+                            link    : '/sections/1/-1',
                         },
                         {
                             title : 'Sostenibilidad',
-                            link    : '/principal/sostenibilidad',
+                            link    : '/sections/3/-1',
                         },
                         {
                         title : 'Herramientas',
-                            link    : '/principal/herramientas',
+                            link    : '/sections/4/-1',
                         },
                     ]
                 },

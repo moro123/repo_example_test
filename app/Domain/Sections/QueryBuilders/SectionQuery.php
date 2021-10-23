@@ -12,12 +12,21 @@ class SectionQuery {
 
     public function getSections(Request $request)
     {
-        if ( $request->has('mainSection') ) {
-            $mainSection = $request->get('mainSection');
-            $sections = Section::where('main_section_id', $mainSection['id'] )->get();
+        Log::info( $request );
+        $sections = [];
 
-            return $sections;
+        $mainSectionId = $request->get('mainSectionId');
+        if ( $mainSectionId != -1) {
+            $sections = Section::where('main_section_id', $mainSectionId )->get();
         }
+
+
+        $sectionId = $request->get('sectionId');
+        if ( $sectionId != -1) {
+            $sections = Section::where('section_id', $sectionId )->get();
+        }
+
+        return $sections;
     }
 
     public function show($id)
@@ -29,16 +38,24 @@ class SectionQuery {
 
     public function store(Request $request)
 	{
-        if ( $request->has('mainSection') ) {
-            $mainSection = $request->get('mainSection');
-            $name = $request->get('item')['name'];
+        Log::info("SectionQuery store");
+        Log::info( $request );
 
-            $section = new Section();
-            $section->main_section_id = $mainSection['id'];
-            $section->name = $name;
+        $name = $request->get('item')['name'];
+        $section = new Section();
 
-            return $section->save();
+        $mainSectionId = $request->get('mainSectionId');
+        if ( $mainSectionId != -1 ) {
+            $section->main_section_id = $mainSectionId;
         }
+
+        $sectionId = $request->get('sectionId');
+        if( $sectionId != -1 ) {
+            $section->section_id = $sectionId;
+        }
+
+        $section->name = $name;
+        return $section->save();
 	}
 
     public function update(Request $request, $id)
@@ -53,12 +70,6 @@ class SectionQuery {
 
             return $section->save();
         }
-
-        
-
-
-        
-
 
 	}
 

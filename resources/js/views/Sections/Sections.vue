@@ -1,6 +1,7 @@
 <template>
     <div id="folder">
 
+
         <messages ref="messages" :progress="progress"></messages>
 
         <v-data-table
@@ -31,6 +32,7 @@
 
                                 <v-col cols="12" sm="6" md="4">
                                     <v-text-field
+                                        @input="inputFieldName()"
                                         v-model="editedItem.name"
                                         label="Nombre"
                                         :rules="nameRules"
@@ -67,7 +69,7 @@
             </template>
             <template v-slot:item.actions="{ item }">
 
-                <v-btn fab small color="primary" @click="openSection(item)" :elevation="3" class="mr-2" >
+                <v-btn fab small color="primary" :to=" '/section/' + item.id " :elevation="3" class="mr-2" >
                     <v-icon>
                         mdi-arrow-right
                     </v-icon>
@@ -102,12 +104,15 @@ import Messages from '../../messages/Messages.vue'
 import sectionApi from '../../api/sections.js'
 
 export default {
-    props: ['mainSection', 'section'],
+    props: ['mainSection'],
     components: {
         Messages
     },
     data() {
         return {
+            sectionId: -1,
+            mainSectionId: -1,
+            section: null,
             error: null,
             progress: false,
             dialog: false,
@@ -131,19 +136,28 @@ export default {
                 name: '',
             },
             nameRules: [
-                v => !!v || 'Name is required',
+                v => !!v || 'Nombre es requerido',
             ],
+
         }
     },
     computed: {
         formTitle () {
             return this.editedIndex === -1 ? 'Nueva sección' : 'Editar seccion'
         },
+        name () {
+            console.log("computed eitedItem.name");
+            return this.editedItem.name;
+        }
     },
 
     watch: {
+        name(val){ 
+            console.log( { name: val } );
+        },
         'editedItem.name': {
             handler: function (after, before) {
+                console.log( { AFTER: val } );
                 if ( after !== '' ) {
                     this.btnSaveDisabled = false;
                 } else {
@@ -152,6 +166,7 @@ export default {
             },
             deep: true
         },
+  
         dialog (val) {
             val || this.close()
         },
@@ -161,40 +176,76 @@ export default {
     },
 
     created () {
-        
+    },
+
+    watch: {
+        section(val) {
+        },
+        $route (to, from){
+            console.log( { TO: to, FROM: from } );
+            this.mainSectionId = this.$route.params.mainSectionId;
+            this.sectionId = this.$route.params.sectionId;
+            this.initialize();
+        }
     },
 
     mounted()
     {
-        console.log( "Section mounted()" );
-        console.log( { mainSection: this.mainSection } );
+        console.log("Sections mounted()");
+      
+    
+        // if ( this.$route.params.section != null ) {
+        //     this.section = Object.assign({}, this.$route.params.section); 
+        //     console.log( { SECTION: this.section }  );
+        // }
+
+        this.mainSectionId = this.$route.params.mainSectionId;
+        this.sectionId = this.$route.params.sectionId;
+
+        console.log( { MAIN_SECTION_ID: this.mainSectionId } );
+
         this.initialize();
     },
 
     methods: {
-        initialize (mainSection, section) {
-            
-            console.log( "section initialize()" );
-            console.log( { mainSection: this.mainSection } );
-            console.log( { section: this.section } );
+        initialize () {
+            console.log("section initialie()");
             let data = {
-                mainSection: this.mainSection, 
-                section: this.section
+                mainSectionId: this.mainSectionId,
+                sectionId: this.sectionId
             }
+
             this.progress = true;
             sectionApi.getSections( data )
             .then( (response) => {
-                console.log( { sections_response: response } );
+                console.log( { initialize_response: response } );
                 this.progress = false;
-                this.data = response.data;
+                this.data =  response.data;
+                
             })
             .catch( (error) => {
-                console.log( { error: error } );
+                console.log( { initialize_error: error } );
                 this.progress = false;
             });
         },
 
+        inputFieldName()
+        {
+            if ( this.editedItem.name !== '' ) {
+                this.btnSaveDisabled = false;
+            } else {
+                this.btnSaveDisabled = true;
+            }
+        },
+
         editItem (item) {
+            console.log( "EDIT ITEM" );
+            console.log( { editedItem: item } );
+
+            if ( item.name !== '' ) {
+                this.btnSaveDisabled = false;
+            }
+
             this.editedIndex = this.data.indexOf(item)
             this.editedItem = Object.assign({}, item)
             this.dialog = true;
@@ -238,20 +289,28 @@ export default {
 
         openSection(item)
         {
-            
-            this.$router.push({
-                name: 'section', 
-                params: { item: item }
-            });
+            // console.log( { OPEN_SECTION: item } );
+            // this.$router.push({
+            //     name: 'section', 
+            //     params: { item: item }
+            // });
+
+           
         },
 
         store()
         {
+            console.log( "SECTION STORE" );
+
             let data = {
-                mainSection: this.mainSection, 
-                section: this.section,
+                mainSectionId: this.mainSectionId, 
+                sectionId: this.sectionId,
                 item: this.editedItem
             }
+
+            console.log("DATA");
+            console.log( { DATA: data } );
+
             sectionApi.store(data)
             .then( (response) => {
                 this.storeProcess(response);
@@ -273,7 +332,6 @@ export default {
 
         update()
         {
-
             console.log("update()");
             console.log( { editedItem: this.editedItem } );
             let data = {

@@ -20,12 +20,12 @@ const router = new VueRouter({
     mode: 'history',
 	routes: [
 		{
-			path: '/sections',
+			path: '/sections/:mainSectionId/:sectionId',
 			name: 'sections',
 			component: Sections
 		},
         {
-			path: '/section',
+			path: '/section/:sectionId',
 			name: 'section',
 			component: Section
 		},

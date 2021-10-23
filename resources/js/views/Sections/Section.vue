@@ -1,6 +1,8 @@
 <template>
     <div id="section">
 
+        
+
         <messages ref="messages" :progress="progress"></messages>
 
         <v-row>
@@ -9,19 +11,19 @@
             </v-col>
             <v-col cols="12" md="6" class="text-right">
                 <v-btn
+                    :to=" '/sections/-1/' + section.id "
                     :disabled="!valid"
                     color="primary"
-                    class="mr-4"
-                    @click="openSections()">
+                    class="mr-4">
                     Secciones
                 </v-btn>
             </v-col>
         </v-row>
 
-
+        
         <v-form
+            
             ref="form">
-
                 <v-row>
                     <v-col cols="12" md="6">
 
@@ -111,11 +113,12 @@
 
                 <v-row>
                     <v-col cols="12" md="6">
+
                         <v-img contain :src="section.currentImage" width="320" height="240"> </v-img>
                     </v-col>
                     <v-col cols="12" md="6">
-                        <video width="320" height="240" controls>
-                            <source :src="section.currentVideo" type="video/mp4">
+                        <video ref="videoRef"  width="320" height="240" controls>
+                            <source  type="video/mp4">
                         </video> 
                     </v-col>
                 </v-row>
@@ -153,9 +156,14 @@
                 </v-btn>
 
         </v-form>
+        
+
 
         <br><br>
 
+
+        <!-- <sections ref="section" :section="section"></sections> -->
+        <br><br>
         <profiles></profiles>
         <br><br>
         <folders></folders>
@@ -170,16 +178,22 @@ import Profiles from './Profiles.vue'
 
 import Messages from '../../messages/Messages.vue'
 import sectionApi from '../../api/sections.js'
+import Sections from './Sections.vue'
 
 export default {
     components: {
         Folders,
         Profiles,
-        Messages
+        Messages,
+        Sections
     },
     data() {
         return {
+            sectionId: -1,
+            tag: 'COMPONENT SECTION',
+            showSections: false,
             host: 'http://investor.admin.sandbox/',
+            // host: 'https://investor-admin.heytics.dev/',
             menu: false,
             valid: true,
             progress: false,
@@ -204,6 +218,7 @@ export default {
                 'Item 4',
             ],
             checkbox: false,
+            sectionParam: null,
         }
     },
     computed: {
@@ -211,70 +226,52 @@ export default {
 
     mounted()
     {
-        console.log( { section: this.$route.params } );
-
-        let section = this.$route.params.item;
-
-        if ( section.image === '' || section.image === '[]' ) {
-            section.image = [];
-        }
-
-        if ( section.image !== '' ){
-            section.currentImage = this.host + section.image;
-            section.image = [];
-        }
-
-        if ( section.video === '' || section.video === '[]' ) {
-            section.video = [];
-        }
-
-        if ( section.video !== '' ) {
-            section.currentVideo =  this.host + section.video;
-            section.video = [];
-        }
-
-        console.log( { SECTION: section } );
-
-        this.section = section;
-        
-        if( this.section != null ) {
-            this.initialize();
-        }
+        this.sectionId = this.$route.params.sectionId;
+        this.initialize();
     },
 
     watch: {
-        'section.image': {
-            handler: function (after, before) {
-            },
-            deep: true
-        },
-        'section.video': {
-            handler: function (after, before) {
-                console.log( { video: after } );
-            },
-            deep: true
-        },
+        
     },
 
     methods: {
         Preview_image() {
-            if ( this.section.image !== []) {
-                this.section.currentImage = URL.createObjectURL(this.section.image);
+            
+            if ( this.section.image !== null ) {
+                if ( this.section.image !== []   ) {
+                    this.section.currentImage = URL.createObjectURL(this.section.image);
+                }
+            } else {
+                if ( this.section.oldimage !== [] ) {
+                    this.section.currentImage = this.section.oldImage;
+                }
             }
+
         },
         Preview_video() {
-            if ( this.section.video !== []) {
-                this.section.currentVideo = URL.createObjectURL(this.section.video);
+            console.log( "Preview_video()" );
+            if ( this.section.video !== null  ) {
+                if ( this.section.video !== [] ) {
+                    console.log( { SECTION_VIDEO : this.section.video } );
+                    this.section.currentVideo = URL.createObjectURL(this.section.video);
+                    console.log( { CURRENT_VIDEO: this.section.currentVideo } );
+                    this.$refs.videoRef.src = this.section.currentVideo;
+                }
+            } else {
+                if ( this.section.video !== [] ) {
+                    this.section.currentVideo = this.section.oldVideo;
+                }
             }
         },
         initialize()
         {
-            
             this.progress = true;
-            sectionApi.show( this.section.id )
+            sectionApi.show( this.sectionId )
             .then( (response) => {
+                console.log( { INITIALIZE_RESPONSE: response.data } );
                 this.progress = false;
-                console.log( { response: response.data } );
+                this.setData( response );
+
             })
             .catch( (error) => {
                 this.progress = false;
@@ -282,7 +279,43 @@ export default {
             });
         },
 
- 
+        setData(response)
+        {
+            console.log( "setData()" );
+            let section = response.data
+
+            if ( section.image === '' || section.image === '[]' ) {
+                section.image = [];
+            }
+
+            if ( section.image !== '' ){
+                section.currentImage = this.host + section.image;
+                section.oldImage = this.host + section.image;
+                section.image = [];
+            }
+
+            if ( section.video === '' || section.video === '[]' ) {
+                section.video = [];
+            }
+
+            if ( section.video !== '' ) {
+                section.currentVideo =  this.host + section.video ;
+
+                this.$refs.videoRef.src = section.currentVideo;
+
+                section.oldVideo = this.host + section.video;
+                section.video = [];
+            }
+
+
+
+            Object.assign(this.section, section); 
+            
+
+
+            console.log( { THIS_SECTION: this.section } );
+        },
+
         validate () {
 
             this.$refs.form.validate()
@@ -297,24 +330,31 @@ export default {
         {
             this.$router.push({
                 name: 'sections', 
-                params: {  }
+                params: { sectionId: this.section.id },
+                query: { sectionId: this.section.id }
             });
+            
         },
 
         update()
         {
+            this.progress = true;
             window.scrollTo(0,0);
             let data = this.section;
 
             delete data.currentImage;
             delete data.currentVideo;
+            delete data.oldImage;
+            delete data.oldVideo;
             
             sectionApi.updateSection( data )
             .then( (response) => {
+                this.progress = false;
                 console.log( { response_store: response } );
                 this.updateProcess(response);
             })
             .catch( (error) => {
+                this.progress = false;
                 console.log( { store_error: error } );
         		this.$refs.messages.showAlertError( "Error", error.message);
             });

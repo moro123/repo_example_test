@@ -21,9 +21,11 @@ use Illuminate\Support\Facades\Route;
 
 // Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::get('/{any}', 'SpaController@index')->where('any','.*');
+//Route::get('/{any}', 'SpaController@index')->where('any','.*');
 
-Route::get('/clear-cache', function() {
-    Artisan::call('cache:clear');
-    return "Cache is cleared";
+Route::get('login', 'AuthController@showLoginForm')->name('login');
+
+Route::group([ 'middleware' => 'auth' ] , function () {
+
+    Route::get('/{any}', 'SpaController@index')->where('any','.*');
 });
