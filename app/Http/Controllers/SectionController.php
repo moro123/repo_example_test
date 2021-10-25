@@ -4,16 +4,19 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Domain\Sections\Services\SectionService;
+use App\Domain\Sections\Services\PageService;
 use Log;
 
 class SectionController extends Controller
 {
     protected $sectionService;
+    protected $pageService;
     protected $CLASS_NAME = "SectionController: ";
 
     public function __construct()
     {
         $this->sectionService =  new sectionService(); 
+        $this->pageService = new PageService();
     }
 
     public function index()
@@ -50,10 +53,13 @@ class SectionController extends Controller
         return $this->sectionService->updateSection( $request);
     }
 
-
-
     public function destroy($id)
     {
         return $this->sectionService->destroy( $id );
+    }
+
+    public function getPage(Request $request)
+    {
+        return $this->pageService->getPage($request);
     }
 }

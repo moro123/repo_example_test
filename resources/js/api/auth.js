@@ -14,7 +14,7 @@ export default
 
     logout()
     {
-        return axios.get('/api/logout');
+        return axios.post('logout');
     }
-
+    
 }

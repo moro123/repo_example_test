@@ -373,8 +373,7 @@ export default {
             })
             .catch( (error) => {
                 console.log( { store_error: error } );
-                this.error = JSON.parse( e.response.data.message);
-        		this.$refs.messages.showAlertError(this.error.title, this.error.message);
+        		this.$refs.messages.showAlertError("Error", error);
             });
         },
 

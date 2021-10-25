@@ -73,6 +73,21 @@ class Section extends Model {
         return $this->parentSection()->with('allParentSections');
     }
 
+    
+	public function delete(){
+		$status = \DB::transaction(function()
+		{
+			try {
+			   unlink( $this->image );
+			   unlink( $this->video );
+			} catch(\Exception $e) {
+			}
+	
+			return parent::delete();
+		});
+	
+		return $status;
+	}
 
 }
 ?>

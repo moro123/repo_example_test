@@ -2,7 +2,7 @@
 namespace App\Domain\Sections\Models;
 use Illuminate\Database\Eloquent\Model;
 
-class Page extends Model {
+class Department extends Model {
 
     /**
      * The table associated with the model 

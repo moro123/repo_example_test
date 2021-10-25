@@ -35,12 +35,25 @@
                                 </v-list-group>
                             </div>
                             <div v-else>
-                                <v-list-item :to="item.link" link>
-                                    <v-list-item-icon>
-                                        <v-icon>{{ item.icon }}</v-icon>
-                                    </v-list-item-icon>
-                                    <v-list-item-title>{{ item.title }}</v-list-item-title>
-                                </v-list-item>
+
+                                <div v-if="item.link === '/logout' ">
+                                    <v-list-item @click="logout()" :to="item.link" link>
+                                        <v-list-item-icon>
+                                            <v-icon>{{ item.icon }}</v-icon>
+                                        </v-list-item-icon>
+                                        <v-list-item-title>{{ item.title }}</v-list-item-title>
+                                    </v-list-item>
+                                </div>
+                                <div v-else>
+                                    <v-list-item :to="item.link" link>
+                                        <v-list-item-icon>
+                                            <v-icon>{{ item.icon }}</v-icon>
+                                        </v-list-item-icon>
+                                        <v-list-item-title>{{ item.title }}</v-list-item-title>
+                                    </v-list-item>
+                                </div>    
+
+
                             </div>
                         
                         </div>
@@ -69,7 +82,7 @@
 
 <script>
 
-
+import authApi from '../api/auth'
 import $ from 'jquery'
 
 export default {
@@ -78,11 +91,6 @@ export default {
             access: null,
             drawer:true,
             routes: [
-                {
-                    icon: 'mdi-home',
-                    title: 'Inicio',
-                    link: '/'
-                }, 
                 {
                     icon     : 'mdi-view-dashboard',
                     title     : 'Principal',
@@ -137,8 +145,6 @@ export default {
                     title: 'Salir',
                     link: '/logout'
                 },  
-
-                
             ],
             right: false,
             permanent: true,
@@ -153,6 +159,16 @@ export default {
     watch: {
     },
     methods: {
+        logout()
+        {
+            authApi.logout()
+            .then( (response) => {
+                location.reload(); 
+            })
+            .catch( (error) => {
+                console.log( error );
+            });
+        }
     }
 }
 </script>

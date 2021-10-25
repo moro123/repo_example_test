@@ -12,7 +12,6 @@ class SectionQuery {
 
     public function getSections(Request $request)
     {
-        Log::info( $request );
         $sections = [];
 
         $mainSectionId = $request->get('mainSectionId');

@@ -192,8 +192,8 @@ export default {
             sectionId: -1,
             tag: 'COMPONENT SECTION',
             showSections: false,
-            host: 'http://investor.admin.sandbox/',
-            // host: 'https://investor-admin.heytics.dev/',
+            // host: 'http://investor.admin.sandbox/',
+            host: 'https://investor-admin.heytics.dev/',
             menu: false,
             valid: true,
             progress: false,
@@ -231,12 +231,11 @@ export default {
     },
 
     watch: {
-        
     },
 
     methods: {
         Preview_image() {
-            
+            console.log("Preview_image()");
             if ( this.section.image !== null ) {
                 if ( this.section.image !== []   ) {
                     this.section.currentImage = URL.createObjectURL(this.section.image);
@@ -362,6 +361,7 @@ export default {
 
         updateProcess(response)
         {
+            this.initialize();
             this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento actualizado");
         },
     },
