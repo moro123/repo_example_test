@@ -15,7 +15,7 @@
                         <v-divider class="mx-4" inset vertical></v-divider>
                     <v-spacer></v-spacer>
 
-                    <v-btn color="primary" dark class="mb-2" @click="openPerfil()">
+                    <v-btn color="primary" dark class="mb-2" :to=" '/profile/' + sectionId ">
                         Agregar perfil
                     </v-btn>
 
@@ -125,10 +125,14 @@
 
 <script>
 import Messages from '../../messages/Messages.vue'
+import profileApi from '../../api/profile.js'
+
+
 export default {
     components: { Messages },
     data() {
         return {
+            sectionId: -1,
             progress: false,
             dialog: false,
             dialogDelete: false,
@@ -167,16 +171,31 @@ export default {
     },
 
     created () {
-        this.initialize()
+    },
+
+    mounted()
+    {
+        this.sectionId = this.$route.params.sectionId;
+        this.initialize();
+
     },
 
     methods: {
-        initialize () {
-        this.desserts = [
-            {
-                name: 'Todo en una',
-            },
-        ]
+        initialize()
+        {
+            let data = {
+                sectionId : this.sectionId
+            }
+            this.progress = true;
+            profileApi.getProfiles( data )
+            .then( (response) => {
+                console.log( { INITIALIZE_PROFILES_RESPONSE: response.data } );
+                this.progress = false;
+            })
+            .catch( (error) => {
+                this.progress = false;
+                console.log( error );
+            });
         },
 
         editItem (item) {
@@ -233,7 +252,7 @@ export default {
         {
             this.$router.push({
                 name: 'profile', 
-                params: {  }
+                params: { sectionId: this.sectionId }
             });
         }
     },

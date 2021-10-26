@@ -113,7 +113,6 @@
 
                 <v-row>
                     <v-col cols="12" md="6">
-
                         <v-img contain :src="section.currentImage" width="320" height="240"> </v-img>
                     </v-col>
                     <v-col cols="12" md="6">
@@ -157,11 +156,7 @@
 
         </v-form>
         
-
-
         <br><br>
-
-
         <!-- <sections ref="section" :section="section"></sections> -->
         <br><br>
         <profiles></profiles>

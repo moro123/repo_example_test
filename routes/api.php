@@ -27,3 +27,8 @@ Route::post('sections/update-section','SectionController@updateSection');
 Route::post('sections/get-page','SectionController@getPage');
 
 Route::resource('sections','SectionController');
+
+
+
+Route::resource('profiles','ProfileController');
+Route::post('profiles/get-profiles','ProfileController@getProfiles');

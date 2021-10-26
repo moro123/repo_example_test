@@ -1,38 +1,51 @@
 <template>
     <div id="profile">
         
+        <messages ref="messages" :progress="progress"></messages>
+
+        <h1> Agregar Perfil </h1>
+
         <v-form
-            ref="form"
-            v-model="valid"
-            lazy-validation>
+            ref="form">
 
                 <v-row>
                     <v-col cols="12" md="6">
                         <v-text-field
-                            v-model="email"
-                        
+                            v-model="profile.name"
                             label="Nombre"
+                            :rules="rules"
                         ></v-text-field>
                     </v-col>
                     <v-col cols="12" md="6">
                         <v-text-field
-                            v-model="email"
+                            v-model="profile.title"
                             label="Titulo"
+                            :rules="rules"
                         ></v-text-field>
                     </v-col>
                 </v-row>
 
                 <v-textarea
+                    v-model="profile.description"
                     name="input-7-1"
                     label="Descripción"
-                    value=""
+                    :rules="rules"
                 ></v-textarea>
 
                 <v-row>
                     <v-col cols="12" md="12">
+                        <v-img contain :src="profile.currentImage" width="320" height="240"> </v-img>
+                    </v-col>
+                </v-row>
+
+                <v-row>
+                    <v-col cols="12" md="12">
                         <v-file-input
+                        @change="Preview_image"
+                        v-model="profile.image"
                         accept="image/*"
                         label="Imagen"
+                        :rules="fileRules"
                         ></v-file-input>
                     </v-col>
 
@@ -43,10 +56,9 @@
                 </v-btn>
 
                 <v-btn
-                    :disabled="!valid"
+                    @click="validate()"
                     color="primary"
-                    class="mr-4"
-                    @click="validate">
+                    class="mr-4">
                     Guardar
                 </v-btn>
     
@@ -62,41 +74,88 @@
 </template>
 
 <script>
+import profileApi from '../../api/profile.js'
+import Messages from '../../messages/Messages.vue'
 import SocialMedia from './SocialMedia.vue'
+
 export default {
-  components: { SocialMedia },
+  components: { Messages, SocialMedia },
     data() {
         return {
-            valid: true,
-            name: '',
-            nameRules: [
-                v => !!v || 'Name is required',
-                v => (v && v.length <= 10) || 'Name must be less than 10 characters',
+            sectionId: -1,
+            progress: false,
+            profile:{ 
+                name: '',
+                title: '',
+                image: [],
+                description: '',
+            },
+            rules: [
+                v => !!v || 'Este campo es requerido',
             ],
-            email: '',
-            emailRules: [
-                v => !!v || 'E-mail is required',
-                v => /.+@.+\..+/.test(v) || 'E-mail must be valid',
-            ],
-            select: null,
-            items: [
-                'Item 1',
-                'Item 2',
-                'Item 3',
-                'Item 4',
-            ],
-            checkbox: false,
+            fileRules: [
+                v => !!v || 'La imagen es requerida',
+                v => (v && v.size > 0) || 'La imagen es requerida',
+            ]
         }
     },
+    mounted() {
+        this.sectionId = this.$route.params.sectionId;
+    },
     methods: {
+        Preview_image() {
+            console.log("Preview_image()");
+            if ( this.profile.image !== null ) {
+                if ( this.profile.image !== []   ) {
+                    console.log( { PROFILE_IMAGE: this.profile.image } );
+                    this.profile.currentImage = URL.createObjectURL(this.profile.image);
+                }
+            } else {
+                if ( this.profile.oldimage !== [] ) {
+                    this.profile.currentImage = this.profile.oldImage;
+                }
+            }
+
+        },
         validate () {
-            this.$refs.form.validate()
+            if( this.$refs.form.validate() ) {
+                this.store();
+            }
         },
         reset () {
             this.$refs.form.reset()
         },
         resetValidation () {
             this.$refs.form.resetValidation()
+        },
+
+        store()
+        {
+            this.progress = true;
+            console.log( "PROFILE STORE" );
+
+            this.profile.sectionId = this.sectionId;
+
+            profileApi.store( this.profile )
+            .then( (response) => {
+                this.progress = false;
+                console.log( { STORE_RESPONSE: response } );
+                this.storeProcess(response);
+            })
+            .catch( (error) => {
+                this.progress = false;
+                console.log( { store_error: error } );
+             
+        		this.$refs.messages.showAlertError( error.title, error.message);
+            });
+        },
+
+        storeProcess(response)
+        {
+            if ( response.data === 1 ) {
+                this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento agregado");
+                this.reset();
+            }
         },
 
     },

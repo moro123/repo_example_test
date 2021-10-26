@@ -2,7 +2,7 @@
 namespace App\Domain\Sections\Models;
 use Illuminate\Database\Eloquent\Model;
 
-class Department extends Model {
+class Profile extends Model {
 
     /**
      * The table associated with the model 
@@ -16,7 +16,7 @@ class Department extends Model {
     *
     * @var bool
     */
-    public $timestamps = true;
+    public $timestamps = false;
 
     /**
      * The atributes that are mass assignable

@@ -112,31 +112,70 @@ export default {
                 },
                 {
                     icon     : 'mdi-view-dashboard',
-                    title     : 'Noticias y Eventos',
-                    link: '',
-                    subLinks : [
-                        {
-                            title : 'Noticias',
-                            link    : '/noticias',
-                        },
-                        {
-                            title : 'Eventos',
-                            link    : '/eventos',
-                        },
-                    ]
-                },
-                {
-                    icon     : 'mdi-view-dashboard',
                     title     : 'Acciones Heytics',
                     link: '',
                     subLinks : [
                         {
                             title : 'Portada',
-                            link    : '/acciones/portada',
+                            link    : '/sections/10/-1',
+                        },
+                        {
+                            title : 'Datos generales',
+                            link    : '/sections/11/-1',
+                        },
+                        {
+                            title : 'Crecimiento',
+                            link    : '/sections/12/-1',
+                        },
+                        {
+                            title : 'Estrategia de marketing',
+                            link    : '/sections/13/-1',
+                        },
+                        {
+                            title : 'Sostenibilidad',
+                            link    : '/sections/14/-1',
+                        },
+                        {
+                            title : 'Documentos importantes',
+                            link    : '/sections/15/-1',
+                        },
+                    ]
+                },
+                {
+                    icon     : 'mdi-view-dashboard',
+                    title     : 'Noticias y Eventos',
+                    link: '',
+                    subLinks : [
+                        {
+                            title : 'Portada',
+                            link    : '/sections/18/-1',
+                        },
+                        {
+                            title : 'Noticias',
+                            link    : '/sections/19/-1',
                         },
                         {
                             title : 'Eventos',
-                            link    : '/',
+                            link    : '/sections/20/-1',
+                        },
+                    ]
+                },
+                {
+                    icon     : 'mdi-view-dashboard',
+                    title     : 'Gobernanza',
+                    link: '',
+                    subLinks : [
+                        {
+                            title : 'Portada',
+                            link    : '/sections/23/-1',
+                        },
+                        {
+                            title : 'Equipo de liderazgo',
+                            link    : '/sections/24/-1',
+                        },
+                        {
+                            title : 'Junta directiva',
+                            link    : '/sections/25/-1',
                         },
                     ]
                 },
