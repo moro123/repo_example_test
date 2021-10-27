@@ -32,3 +32,10 @@ Route::resource('sections','SectionController');
 
 Route::resource('profiles','ProfileController');
 Route::post('profiles/get-profiles','ProfileController@getProfiles');
+Route::post('profiles/update-profile','ProfileController@updateProfile');
+
+
+Route::resource('social-media','SocialMediaController');
+Route::post('social-media/get-social-media','SocialMediaController@getSocialMedia');
+Route::post('social-media/update-social-media','SocialMediaController@updateSocialMedia');
+

@@ -3,22 +3,22 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Domain\Sections\Services\ProfileService;
+use App\Domain\Sections\Services\SocialMediaService;
 use Log;
 
-class ProfileController extends Controller
+class SocialMediaController extends Controller
 {
     protected $service;
-    protected $CLASS_NAME = "ProfileController: ";
+    protected $CLASS_NAME = "SocialMediaController: ";
 
     public function __construct()
     {
-        $this->service =  new profileService(); 
+        $this->service =  new SocialMediaService(); 
     }
 
-    public function getProfiles(Request $request)
+    public function getSocialMedia(Request $request)
     {
-        return $this->service->getProfiles($request);
+        return $this->service->getSocialMedia($request);
     }
 
     public function store(Request $request)
@@ -37,17 +37,13 @@ class ProfileController extends Controller
 
     public function update(Request $request, $id)
     {
-        Log::info( "ProfileController" );
-        Log::info( $request );
         return $this->service->update( $request, $id );
     }
 
-    public function updateProfile(Request $request)
+    public function updateSocialMedia(Request $request)
     {
-        return $this->service->updateProfile( $request );
+        return $this->service->updateSocialMedia( $request );
     }
-
-
 
     public function destroy($id)
     {

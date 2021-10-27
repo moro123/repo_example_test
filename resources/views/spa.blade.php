@@ -10,6 +10,7 @@
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
     <meta id="access"  content="{{  json_encode( session('access') !== null ) }}">
     <link id="swap" rel="stylesheet" href="">
+    <input id="input-host" type="hidden" value="{{ Request::root() }}">
 
 </head>
 <body>

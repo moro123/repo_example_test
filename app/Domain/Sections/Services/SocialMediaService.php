@@ -3,23 +3,23 @@
 namespace App\Domain\Sections\Services;
 
 
-use App\Domain\Sections\QueryBuilders\ProfileQuery;
+use App\Domain\Sections\QueryBuilders\SocialMediaQuery;
 use Illuminate\Http\Request;
 use Log;
 
-class ProfileService
+class SocialMediaService
 {
 	protected $query;
-    protected $CLASS_NAME = "ProfileService: ";
+    protected $CLASS_NAME = "SocialMediaService: ";
 
 	public function __construct()
     {
-        $this->query = new ProfileQuery();
+        $this->query = new SocialMediaQuery();
     }
 
-    public function getProfiles(Request $request)
+    public function getSocialMedia(Request $request)
     {
-        return $this->query->getProfiles($request);
+        return $this->query->getSocialMedia($request);
     }
 
     public function show($id)
@@ -37,9 +37,9 @@ class ProfileService
 		return $this->query->update($request, $id);
 	}
 
-    public function updateProfile(Request $request)
+    public function updateSocialMedia(Request $request)
 	{
-		return $this->query->updateProfile($request);
+		return $this->query->updateSocialMedia($request);
 	}
 
 	public function destroy($id)

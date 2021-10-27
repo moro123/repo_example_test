@@ -174,6 +174,7 @@ import Profiles from './Profiles.vue'
 import Messages from '../../messages/Messages.vue'
 import sectionApi from '../../api/sections.js'
 import Sections from './Sections.vue'
+import $ from 'jquery'
 
 export default {
     components: {
@@ -187,8 +188,7 @@ export default {
             sectionId: -1,
             tag: 'COMPONENT SECTION',
             showSections: false,
-            // host: 'http://investor.admin.sandbox/',
-            host: 'https://investor-admin.heytics.dev/',
+            host: '',
             menu: false,
             valid: true,
             progress: false,
@@ -217,6 +217,11 @@ export default {
         }
     },
     computed: {
+    },
+
+    created()
+    {
+        this.host = $("#input-host").val() + "/";
     },
 
     mounted()

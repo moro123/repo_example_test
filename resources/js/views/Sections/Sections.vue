@@ -257,7 +257,7 @@ export default {
             this.dialogDelete = true
         },
 
-        deleteItemConfirm () {
+        deleteItemConfirm() {
             this.closeDelete()
             this.destroy();
         },

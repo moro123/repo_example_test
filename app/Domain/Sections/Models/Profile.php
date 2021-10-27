@@ -36,6 +36,21 @@ class Profile extends Model {
         return $this->hasMany(SocialMedia::class);
     }
 
+    public function delete(){
+		$status = \DB::transaction(function()
+		{
+			try {
+			   unlink( $this->image );
+			} catch(\Exception $e) {
+			}
+	
+            $this->social_media()->delete();
+			return parent::delete();
+		});
+	
+		return $status;
+	}
+
 
 }
 ?>

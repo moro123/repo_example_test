@@ -5,7 +5,7 @@
 
         <v-data-table
             :headers="headers"
-            :items="desserts"
+            :items="data"
             sort-by="calories"
             class="elevation-1">
 
@@ -31,27 +31,33 @@
 
                                 <v-col cols="12" sm="6" md="4">
                                     <v-text-field
-                                        v-model="editedItem.name"
+                                        v-model="socialMedia.name"
                                         label="Nombre"
+                                        :rules="rules"
                                     ></v-text-field>
                                 </v-col>
 
                                 <v-col cols="12" sm="6" md="4">
                                     <v-text-field
-                                        v-model="editedItem.name"
+                                        v-model="socialMedia.link"
                                         label="Link"
+                                        :rules="rules"
                                     ></v-text-field>
+                                </v-col>
+
+                                <v-col cols="12" md="12">
+                                    <v-img contain :src="socialMedia.currentImage" width="120" height="140"> </v-img>
                                 </v-col>
 
                                 <v-col cols="12" sm="6" md="4">
                                     <v-file-input
+                                    v-model="socialMedia.icon"
                                     accept="image/*"
                                     label="Icono"
+                                    :rules="fileRules"
                                     ></v-file-input>
                                 </v-col>
 
-
-                          
                             </v-row>
                             </v-container>
                         </v-card-text>
@@ -113,6 +119,7 @@
 
 <script>
 import Messages from '../../messages/Messages.vue'
+import socialMediaApi from '../../api/social-media.js'
 
 export default {
     components: {
@@ -120,6 +127,7 @@ export default {
     },
     data() {
         return {
+            profileId: -1,
             progress: false,
             dialog: false,
             dialogDelete: false,
@@ -132,6 +140,12 @@ export default {
                 },
                 { text: 'Actiones', value: 'actions', sortable: false },
             ],
+            socialMedia: {
+                name: '',
+                link: '',
+                icon: ''
+            },
+            data: [],
             desserts: [],
             editedIndex: -1,
             editedItem: {
@@ -140,6 +154,13 @@ export default {
             defaultItem: {
                 name: '',
             },
+            rules: [
+                v => !!v || 'Este campo es requerido',
+            ],
+            fileRules: [
+                v => !!v || 'La imagen es requerida',
+                v => (v && v.size > 0) || 'La imagen es requerida',
+            ]
         }
     },
     computed: {
@@ -158,16 +179,30 @@ export default {
     },
 
     created () {
-        this.initialize()
+    },
+    mounted()
+    {
+        this.profileId = this.$route.params.profileId;
+        this.initialize();
     },
 
     methods: {
         initialize () {
-        this.desserts = [
-            {
-                name: 'Todo en una',
-            },
-        ]
+            this.progress = true;
+            let data = {
+                sectionId : this.sectionId
+            }
+            
+            socialMediaApi.getSocialMedia( data )
+            .then( (response) => {
+                this.progress = false;
+                console.log( { INITIALIZE_SOCIAL_RESPONSE: response.data } );
+                this.data = response.data;
+            })
+            .catch( (error) => {
+                this.progress = false;
+                console.log( error );
+            });
         },
 
         editItem (item) {

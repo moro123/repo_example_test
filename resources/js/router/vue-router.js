@@ -50,7 +50,7 @@ const router = new VueRouter({
 			component: Folder
 		},
 		{
-			path: '/profile/:sectionId',
+			path: '/profile/:profileId',
 			name: 'profile',
 			component: Profile
 		},

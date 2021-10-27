@@ -3,7 +3,7 @@
         
         <messages ref="messages" :progress="progress"></messages>
 
-        <h1> Agregar Perfil </h1>
+        <h1> Editar Perfil </h1>
 
         <v-form
             ref="form">
@@ -45,11 +45,11 @@
                         v-model="profile.image"
                         accept="image/*"
                         label="Imagen"
-                        :rules="fileRules"
                         ></v-file-input>
                     </v-col>
-
                 </v-row>
+
+                <br><br>
 
                 <v-btn  class="mr-4" @click="reset">
                     Cancelar
@@ -68,7 +68,11 @@
 
         </v-form>
         <br> <br>
+
         <social-media></social-media>
+          <br> <br>
+          <br> <br>
+       
 
     </div>
 </template>
@@ -77,12 +81,14 @@
 import profileApi from '../../api/profile.js'
 import Messages from '../../messages/Messages.vue'
 import SocialMedia from './SocialMedia.vue'
+import $ from 'jquery'
 
 export default {
   components: { Messages, SocialMedia },
     data() {
         return {
-            sectionId: -1,
+            host: '',
+            profileId: -1,
             progress: false,
             profile:{ 
                 name: '',
@@ -93,35 +99,82 @@ export default {
             rules: [
                 v => !!v || 'Este campo es requerido',
             ],
-            fileRules: [
-                v => !!v || 'La imagen es requerida',
-                v => (v && v.size > 0) || 'La imagen es requerida',
-            ]
+
         }
     },
+    created()
+    {
+        this.host = $("#input-host").val() + "/";
+        console.log( { HOST: this.host } );
+    },
     mounted() {
-        this.sectionId = this.$route.params.sectionId;
+        this.profileId = this.$route.params.profileId;
+        this.initialize();
     },
     methods: {
+
+        initialize()
+        {
+            this.progress = true;
+            profileApi.show(this.profileId)
+            .then( (response) => {
+                this.progress = false;
+                console.log( { PROFILE_INITIALIZE_response: response } );
+                this.setData( response );
+            })
+            .catch( (error) => {
+                this.progress = false;
+                console.log( { PROFILE_INITIALIZE_ERROR: error } );
+                this.$refs.messages.showAlertError("Error", error);
+            });
+        },
+
+        setData(response)
+        {
+            let profile = response.data;
+            this.profile.currentImage = this.host + profile.image;
+            profile.image = [];
+            
+            Object.assign(this.profile, profile); 
+
+            this.profile.image = [];
+        },
+
         Preview_image() {
             console.log("Preview_image()");
-            if ( this.profile.image !== null ) {
-                if ( this.profile.image !== []   ) {
-                    console.log( { PROFILE_IMAGE: this.profile.image } );
-                    this.profile.currentImage = URL.createObjectURL(this.profile.image);
-                }
-            } else {
-                if ( this.profile.oldimage !== [] ) {
-                    this.profile.currentImage = this.profile.oldImage;
-                }
-            }
-
+            this.profile.currentImage = URL.createObjectURL(this.profile.image);
         },
         validate () {
+            console.log( "validate()" );
             if( this.$refs.form.validate() ) {
-                this.store();
+                this.update();
             }
         },
+
+        update()
+        {
+            console.log( "update()" );
+            console.log( { PROFILE: this.profile } );
+
+            this.progress = true;
+            profileApi.update( this.profile )
+            .then( (response) => {
+                this.progress = false;
+                console.log( { UPDATE_RESPONSE: response } );
+                this.updateProcess();
+            })
+            .catch( (error) => {
+                this.progress = false;
+                console.log( { UPDATE_ERROR: error } );
+            });
+        },
+
+        updateProcess()
+        {
+            this.initialize();
+            this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento actualizado");
+        },
+
         reset () {
             this.$refs.form.reset()
         },
@@ -129,34 +182,7 @@ export default {
             this.$refs.form.resetValidation()
         },
 
-        store()
-        {
-            this.progress = true;
-            console.log( "PROFILE STORE" );
-
-            this.profile.sectionId = this.sectionId;
-
-            profileApi.store( this.profile )
-            .then( (response) => {
-                this.progress = false;
-                console.log( { STORE_RESPONSE: response } );
-                this.storeProcess(response);
-            })
-            .catch( (error) => {
-                this.progress = false;
-                console.log( { store_error: error } );
-             
-        		this.$refs.messages.showAlertError( error.title, error.message);
-            });
-        },
-
-        storeProcess(response)
-        {
-            if ( response.data === 1 ) {
-                this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento agregado");
-                this.reset();
-            }
-        },
+    
 
     },
 }
