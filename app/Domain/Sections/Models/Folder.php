@@ -2,7 +2,7 @@
 namespace App\Domain\Sections\Models;
 use Illuminate\Database\Eloquent\Model;
 
-class Department extends Model {
+class Folder extends Model {
 
     /**
      * The table associated with the model 
@@ -16,7 +16,7 @@ class Department extends Model {
     *
     * @var bool
     */
-    public $timestamps = true;
+    public $timestamps = false;
 
     /**
      * The atributes that are mass assignable
@@ -32,6 +32,17 @@ class Department extends Model {
     {
         return $this->hasMany(Document::class);
     }
+
+
+    public function delete(){
+		$status = \DB::transaction(function()
+		{
+            $this->documents->delete();
+			return parent::delete();
+		});
+	
+		return $status;
+	}
 
 
 }

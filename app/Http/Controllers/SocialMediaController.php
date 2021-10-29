@@ -42,6 +42,7 @@ class SocialMediaController extends Controller
 
     public function updateSocialMedia(Request $request)
     {
+        
         return $this->service->updateSocialMedia( $request );
     }
 

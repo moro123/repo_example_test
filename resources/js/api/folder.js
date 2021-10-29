@@ -7,19 +7,19 @@ export default {
 
     show(id)
     {
-        return axios.get('/api/social-media/' + id); 
+        return axios.get('/api/folder/' + id); 
     },
         
-    getSocialMedia(data)
+    getFolders(data)
     {
-        console.log({ API_GET_SOCIAL_MEDIA_DATA: data } );
-        return axios.post('/api/social-media/get-social-media', data);
+        console.log({ API_GET_FOLDER_DATA: data } );
+        return axios.post('/api/folder/get-folders', data);
     },
     
 	store(data){
 		let formData = this.jsonToFormData(data);
 
-		return axios.post('/api/social-media',
+		return axios.post('/api/folder',
 			formData,
 			{ 
 				headers: {
@@ -35,13 +35,11 @@ export default {
     // },
 
 
-	update(data) {
-		console.log( "UPDATE SOCIAL MEDIA" );
+	updateFolder(data) {
+		console.log( "UPDATE FOLDER" );
 		let formData = this.jsonToFormData(data);
 
-      
-
-		return axios.post('/api/social-media/update-social-media',
+		return axios.post('/api/folder/update-folder',
 			formData,
 			{ 
 				headers: {
@@ -53,7 +51,8 @@ export default {
 
     
     destroy(id) {
-        return axios.delete('/api/social-media/' + id,);
+        console.log( "FOLDER API DESTROY" );
+        return axios.delete('/api/folder/' + id,);
     },
 
     buildFormData(formData, data, parentKey) {

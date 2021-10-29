@@ -45,7 +45,7 @@ const router = new VueRouter({
 			component: Herramientas
 		},
 		{
-			path: '/folder',
+			path: '/folder/:folderId',
 			name: 'folder',
 			component: Folder
 		},

@@ -1,11 +1,11 @@
 <template>
     <div id="folder">
 
-        <messages :progress="progress"></messages>
+        <messages ref="messages" :progress="progress"></messages>
 
         <v-data-table
             :headers="headers"
-            :items="desserts"
+            :items="data"
             sort-by="calories"
             class="elevation-1">
 
@@ -27,16 +27,32 @@
             
                         <v-card-text>
                             <v-container>
-                            <v-row>
 
-                                <v-col cols="12" sm="6" md="4">
-                                    <v-text-field
-                                        v-model="editedItem.name"
-                                        label="Nombre"
-                                    ></v-text-field>
-                                </v-col>
-                          
-                            </v-row>
+                            <v-form ref="form">
+                                <v-row>
+                                    <v-col cols="12" md="12">
+                                        <v-text-field
+                                            v-model="editedItem.name"
+                                            label="Nombre"
+                                            :rules="rules"
+                                        ></v-text-field>
+                                    </v-col>
+
+                                    <v-row>
+                                        <v-col cols="12" md="12">
+                                            <v-file-input
+                                            v-model="editedItem.link"
+                                            accept=".pdf"
+                                            label="Documento"
+                                            :rules="fileRules"
+                                            ></v-file-input>
+                                        </v-col>
+                                    </v-row>
+                            
+                                </v-row>
+                            </v-form>
+
+
                             </v-container>
                         </v-card-text>
             
@@ -66,7 +82,7 @@
             </template>
             <template v-slot:item.actions="{ item }">
 
-                <v-btn fab small color="primary" @click="openSection(item)" :elevation="3" class="mr-2" >
+                <v-btn fab small color="primary" @click="openDocument(item)" :elevation="3" class="mr-2" >
                     <v-icon>
                         mdi-arrow-right
                     </v-icon>
@@ -97,6 +113,8 @@
 
 <script>
 import Messages from '../../messages/Messages.vue'
+import documentApi from '../../api/document.js'
+import $ from 'jquery'
 
 export default {
     components: {
@@ -104,6 +122,7 @@ export default {
     },
     data() {
         return {
+            host: '',
             progress: false,
             dialog: false,
             dialogDelete: false,
@@ -116,19 +135,38 @@ export default {
                 },
                 { text: 'Actiones', value: 'actions', sortable: false },
             ],
+            data: [],
             desserts: [],
             editedIndex: -1,
             editedItem: {
                 name: '',
+                link:[]
             },
             defaultItem: {
                 name: '',
+                link:[]
             },
+            rules: [
+                v => !!v || 'Este campo es requerido',
+            ],
         }
     },
     computed: {
         formTitle () {
             return this.editedIndex === -1 ? 'Nuevo documento' : 'Editar documento'
+        },
+
+        fileRules(){
+            if ( this.editedIndex === -1 ) {
+                return [
+                    v => !!v || 'El documento es requerido',
+                    v => v.size > 0 || 'El documento es requerido',
+                ]
+            } else {
+                return [
+                    v => !!v || 'El documento es requerido'
+                ]
+            }
         },
     },
 
@@ -142,42 +180,134 @@ export default {
     },
 
     created () {
-        this.initialize()
+       this.host = $("#input-host").val() + "/";
+    },
+
+    mounted() {
+        this.folderId = this.$route.params.folderId;
+        this.initialize();
+    },
+
+    watch: {
+        editedItem(val) {
+            console.log( { editedItem: val } );
+        }
     },
 
     methods: {
         initialize () {
-        this.desserts = [
-            {
-                name: 'Todo en una',
-            },
-        ]
+            
+            this.progress = true;
+            let data = {
+                folderId : this.folderId
+            }
+            
+            documentApi.getDocuments( data )
+            .then( (response) => {
+                console.log( { DOCUMENTS_RESPOMNSE: response } );
+                this.progress = false;
+                this.data = response.data;
+            })
+            .catch( (error) => {
+                console.log( error );
+                this.progress = false;
+            });
+
+        },
+
+        store()
+        {
+            this.progress = true;
+            this.editedItem.folderId = this.folderId;
+
+            documentApi.store( this.editedItem )
+            .then( (response) => {
+                console.log( { DOCUMENT_STORE_RESPONSE: response } );
+                this.progress = false;
+                this.storeProcess(response);
+            })
+            .catch( (error) => {
+                console.log( error );
+                this.progress = false;
+               
+        		this.$refs.messages.showAlertError( error.title, error.message);
+            });
+        },
+
+        storeProcess(response)
+        {
+            if ( response.data === 1 ) {
+                this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento agregado");
+                this.initialize();
+            }
+        },
+
+        update()
+        {
+            console.log( "update()" );
+            console.log( { FOLDER: this.editedItem } );
+
+            this.progress = true;
+            documentApi.update( this.editedItem )
+            .then( (response) => {
+                this.progress = false;
+                console.log( { UPDATE_RESPONSE: response } );
+                this.updateProcess();
+            })
+            .catch( (error) => {
+                this.progress = false;
+                console.log( { UPDATE_ERROR: error } );
+            });
+        },
+
+        updateProcess()
+        {
+            this.initialize();
+            this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento actualizado");
+        },
+
+        destroy()
+        {
+            this.progress = true;
+            documentApi.destroy(this.editedItem.id)
+            .then( (response) => {
+                this.progress = false;
+                console.log( { DESTROY_RESPONSE: response.data } );
+                this.destroyProcess(response);
+            })
+            .catch( (error) => {
+                this.progress = false;
+                console.log( { store_error: error } );
+        		this.$refs.messages.showAlertError("Error", error);
+            });
+        },
+
+        destroyProcess(response)
+        {
+            if ( response.data === 1 ) {
+                this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento eliminado");
+                this.initialize();
+            }
         },
 
         editItem (item) {
-            this.editedIndex = this.desserts.indexOf(item)
-            this.editedItem = Object.assign({}, item)
+            this.editedIndex = this.data.indexOf(item)
+            this.editedItem.id = item.id;
+            this.editedItem.name = item.name;
             this.dialog = true
         },
 
         deleteItem (item) {
-            this.editedIndex = this.desserts.indexOf(item)
-            this.editedItem = Object.assign({}, item)
+            this.editedIndex = this.data.indexOf(item)
+            this.editedItem.id = item.id;
             this.dialogDelete = true
         },
 
         deleteItemConfirm () {
-            this.desserts.splice(this.editedIndex, 1)
+            this.destroy();
             this.closeDelete()
         },
 
-        close () {
-            this.dialog = false
-            this.$nextTick(() => {
-                this.editedItem = Object.assign({}, this.defaultItem)
-                this.editedIndex = -1
-            })
-        },
 
         closeDelete () {
             this.dialogDelete = false
@@ -188,13 +318,25 @@ export default {
         },
 
         save () {
-            if (this.editedIndex > -1) {
-                Object.assign(this.desserts[this.editedIndex], this.editedItem)
-            } else {
-                this.desserts.push(this.editedItem)
+            if ( this.$refs.form.validate() ) {
+                if (this.editedIndex > -1) {
+                    this.update();
+                } else {
+                    this.store();
+                }
+                this.close();
             }
-            this.close()
+
         },
+
+        close () {
+            this.dialog = false
+            this.$nextTick(() => {
+                this.editedItem = Object.assign({}, this.defaultItem)
+                this.editedIndex = -1
+            })
+        },
+
 
         openSection(item)
         {
@@ -202,7 +344,13 @@ export default {
                 name: 'section', 
                 params: { item: item }
             });
+        },
+
+        openDocument(item)
+        {
+            window.open( this.host + item.link , '_blank').focus();
         }
+
     },
 }
 </script>

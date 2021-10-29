@@ -7,19 +7,19 @@ export default {
 
     show(id)
     {
-        return axios.get('/api/social-media/' + id); 
+        return axios.get('/api/document/' + id); 
     },
         
-    getSocialMedia(data)
+    getDocuments(data)
     {
-        console.log({ API_GET_SOCIAL_MEDIA_DATA: data } );
-        return axios.post('/api/social-media/get-social-media', data);
+        return axios.post('/api/document/get-documents', data);
     },
     
+
 	store(data){
 		let formData = this.jsonToFormData(data);
 
-		return axios.post('/api/social-media',
+		return axios.post('/api/document',
 			formData,
 			{ 
 				headers: {
@@ -29,19 +29,14 @@ export default {
 		);
 	},
     
-    // update(data, id)
-    // {
-    //     return axios.put('/api/sections/' + id, data);
-    // },
-
-
 	update(data) {
-		console.log( "UPDATE SOCIAL MEDIA" );
+		console.log( { DATA: data } );
 		let formData = this.jsonToFormData(data);
 
-      
+        console.log("api update()");
+        console.log( { formData: formData } );
 
-		return axios.post('/api/social-media/update-social-media',
+		return axios.post('/api/document/update-document',
 			formData,
 			{ 
 				headers: {
@@ -53,7 +48,7 @@ export default {
 
     
     destroy(id) {
-        return axios.delete('/api/social-media/' + id,);
+        return axios.delete('/api/document/' + id,);
     },
 
     buildFormData(formData, data, parentKey) {

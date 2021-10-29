@@ -216,17 +216,15 @@ export default {
     methods: {
         Preview_image() {
             console.log("Preview_image()");
-            if ( this.profile.image !== null ) {
-                if ( this.profile.image !== []   ) {
-                    console.log( { PROFILE_IMAGE: this.profile.image } );
-                    this.profile.currentImage = URL.createObjectURL(this.profile.image);
-                }
-            } else {
-                if ( this.profile.oldimage !== [] ) {
-                    this.profile.currentImage = this.profile.oldImage;
-                }
-            }
+            if ( !Array.isArray(this.profile.image) ) {
+                console.log( { PROFILE_IMAGE: this.profile.image } );
+                this.profile.currentImage = URL.createObjectURL(this.profile.image);
+            } 
 
+            if ( !Array.isArray( this.profile.oldimage ) ) {
+                this.profile.currentImage = this.profile.oldImage;
+            }
+            
         },
         initialize()
         {

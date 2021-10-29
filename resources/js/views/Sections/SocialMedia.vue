@@ -1,7 +1,7 @@
 <template>
     <div id="folder">
 
-        <messages :progress="progress"></messages>
+        <messages ref="messages" :progress="progress"></messages>
 
         <v-data-table
             :headers="headers"
@@ -27,38 +27,44 @@
             
                         <v-card-text>
                             <v-container>
-                            <v-row>
 
-                                <v-col cols="12" sm="6" md="4">
-                                    <v-text-field
-                                        v-model="socialMedia.name"
-                                        label="Nombre"
-                                        :rules="rules"
-                                    ></v-text-field>
-                                </v-col>
+                            <v-form ref="form">
+                                <v-row>
 
-                                <v-col cols="12" sm="6" md="4">
-                                    <v-text-field
-                                        v-model="socialMedia.link"
-                                        label="Link"
-                                        :rules="rules"
-                                    ></v-text-field>
-                                </v-col>
+                                    <v-col cols="12" md="6">
+                                        <v-text-field
+                                            v-model="socialMedia.name"
+                                            label="Nombre"
+                                            :rules="rules"
+                                        ></v-text-field>
+                                    </v-col>
 
-                                <v-col cols="12" md="12">
-                                    <v-img contain :src="socialMedia.currentImage" width="120" height="140"> </v-img>
-                                </v-col>
+                                    <v-col cols="12" md="6">
+                                        <v-text-field
+                                            v-model="socialMedia.link"
+                                            label="Link"
+                                            :rules="rules"
+                                        ></v-text-field>
+                                    </v-col>
 
-                                <v-col cols="12" sm="6" md="4">
-                                    <v-file-input
-                                    v-model="socialMedia.icon"
-                                    accept="image/*"
-                                    label="Icono"
-                                    :rules="fileRules"
-                                    ></v-file-input>
-                                </v-col>
+                                    <v-col cols="12" md="12">
+                                        <v-img contain :src="socialMedia.currentIcon" width="120" height="140"> </v-img>
+                                    </v-col>
 
-                            </v-row>
+                                    <v-col cols="12"  md="12">
+                                        <v-file-input
+                                        @change="Preview_image"
+                                        v-model="socialMedia.icon"
+                                        accept="image/*"
+                                        label="Icono"
+                                        :rules="fileRules"
+                                        ></v-file-input>
+                                    </v-col>
+
+                                </v-row>
+                            </v-form>
+
+
                             </v-container>
                         </v-card-text>
             
@@ -67,7 +73,7 @@
                             <v-btn color="blue darken-1" text @click="close">
                                 Cancelar
                             </v-btn>
-                            <v-btn color="blue darken-1" text @click="save">
+                            <v-btn color="blue darken-1" text @click="validate">
                                 Guardar
                             </v-btn>
                         </v-card-actions>
@@ -88,11 +94,11 @@
             </template>
             <template v-slot:item.actions="{ item }">
 
-                <v-btn fab small color="primary" @click="openSection(item)" :elevation="3" class="mr-2" >
+                <!-- <v-btn fab small color="primary" @click="openSection(item)" :elevation="3" class="mr-2" >
                     <v-icon>
                         mdi-arrow-right
                     </v-icon>
-                </v-btn>
+                </v-btn> -->
 
                 <v-btn fab small @click="editItem(item)" :elevation="3" class="mr-2">
                     <v-icon small >
@@ -120,6 +126,7 @@
 <script>
 import Messages from '../../messages/Messages.vue'
 import socialMediaApi from '../../api/social-media.js'
+import $ from 'jquery'
 
 export default {
     components: {
@@ -127,6 +134,7 @@ export default {
     },
     data() {
         return {
+            host: '',
             profileId: -1,
             progress: false,
             dialog: false,
@@ -143,7 +151,14 @@ export default {
             socialMedia: {
                 name: '',
                 link: '',
-                icon: ''
+                icon: [],
+                currentIcon: '',
+            },
+            socialMediaDefault: {
+                name: '',
+                link: '',
+                icon: [],
+                currentIcon: '',
             },
             data: [],
             desserts: [],
@@ -157,40 +172,83 @@ export default {
             rules: [
                 v => !!v || 'Este campo es requerido',
             ],
-            fileRules: [
-                v => !!v || 'La imagen es requerida',
-                v => (v && v.size > 0) || 'La imagen es requerida',
-            ]
+            // fileRules: [
+            //     v => !!v || 'El icono es requerido',
+            //     v => v.size > 0 || 'El icono es requerido',
+            // ]
         }
     },
     computed: {
+        fileRules(){
+            if ( this.editedIndex === -1 ) {
+                return [
+                    v => !!v || 'El icono es requerido',
+                    v => v.size > 0 || 'El icono es requerido',
+                ]
+            } else {
+                return [
+                    v => !!v || 'El icono es requerido'
+                ]
+            }
+        },
+
         formTitle () {
             return this.editedIndex === -1 ? 'Nueva red social' : 'Editar red social'
         },
     },
 
     watch: {
-        dialog (val) {
-            val || this.close()
-        },
-        dialogDelete (val) {
-            val || this.closeDelete()
-        },
+        dialog(val)
+        {
+            if ( val && this.editedIndex === -1) {
+                try {
+                    this.reset()
+                } catch (error) {
+                    
+                }
+            }
+            if ( !val ) {
+                this.close();
+            }
+        }
     },
 
     created () {
+        this.host = $("#input-host").val() + "/";
     },
     mounted()
     {
+        
         this.profileId = this.$route.params.profileId;
+        console.log("SOCIAL MEDIA");
+        console.log( { PROFILE_ID: this.profileId } );
+
         this.initialize();
     },
 
     methods: {
+        /*
+          -> Response:    icon: "storage/PRirGEotS9gYqUVtq3rocmSLLjmBSDGaHE74VNCN.jpg"
+          -> Open Dialog: icon: Array []
+          -> Close Dialog:
+        */
+        Preview_image() {
+            console.log("Preview_image()");
+            
+            if (  !Array.isArray(this.socialMedia.icon)   ) {
+                console.log( { PROFILE_IMAGE: this.socialMedia.icon } );
+                this.socialMedia.currentIcon = URL.createObjectURL(this.socialMedia.icon);
+            }
+            
+            if ( !Array.isArray( this.socialMedia.oldIcon ) ) {
+                this.socialMedia.currentIcon = this.socialMedia.oldIcon;
+            }
+            
+        },
         initialize () {
             this.progress = true;
             let data = {
-                sectionId : this.sectionId
+                profileId : this.profileId
             }
             
             socialMediaApi.getSocialMedia( data )
@@ -206,9 +264,15 @@ export default {
         },
 
         editItem (item) {
-            this.editedIndex = this.desserts.indexOf(item)
-            this.editedItem = Object.assign({}, item)
-            this.dialog = true
+            this.editedIndex = this.data.indexOf(item)
+            this.socialMedia.id =  item.id;
+            this.socialMedia.name =  item.name;
+            this.socialMedia.link = item.link;
+            this.socialMedia.currentIcon = this.host + item.icon
+
+            console.log( { SOCIAL_MEDIA: this.socialMedia } );
+
+            this.dialog = true;
         },
 
         deleteItem (item) {
@@ -218,16 +282,18 @@ export default {
         },
 
         deleteItemConfirm () {
-            this.desserts.splice(this.editedIndex, 1)
-            this.closeDelete()
+            this.dialogDelete = false;
+            this.destroy();
         },
 
         close () {
+            this.editedIndex = -1;           
             this.dialog = false
-            this.$nextTick(() => {
-                this.editedItem = Object.assign({}, this.defaultItem)
-                this.editedIndex = -1
-            })
+        },
+    
+
+        reset () {
+            this.$refs.form.reset()
         },
 
         closeDelete () {
@@ -238,11 +304,46 @@ export default {
             })
         },
 
+        validate () {
+            if( this.$refs.form.validate() ) {
+                this.dialog = false;
+                this.save();
+            }
+        },
+
+        store()
+        {
+            this.progress = true;
+            console.log( "SECTION STORE" );
+
+            this.socialMedia.profileId = this.profileId;
+
+            socialMediaApi.store( this.socialMedia )
+            .then( (response) => {
+                this.progress = false;
+                console.log( { STORE_SOCIAL_RESPONSE: response.data } );
+                this.storeProcess(response);
+            })
+            .catch( (error) => {
+                this.progress = false;
+                console.log( { store_error: error } );
+        		this.$refs.messages.showAlertError( error.title, error.message);
+            });
+        },
+
+        storeProcess(response)
+        {
+            if ( response.data === 1 ) {
+                this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento agregado");
+                this.initialize();
+            }
+        },
+
         save () {
             if (this.editedIndex > -1) {
-                Object.assign(this.desserts[this.editedIndex], this.editedItem)
+                this.update();
             } else {
-                this.desserts.push(this.editedItem)
+                this.store();
             }
             this.close()
         },
@@ -253,7 +354,51 @@ export default {
                 name: 'section', 
                 params: { item: item }
             });
-        }
+        },
+
+        destroy()
+        {
+            socialMediaApi.destroy(this.editedItem.id)
+            .then( (response) => {
+                console.log( { DESTROY_RESPONSE: response.data } );
+                this.destroyProcess(response);
+            })
+            .catch( (error) => {
+                console.log( { store_error: error } );
+        		this.$refs.messages.showAlertError("Error", error);
+            });
+        },
+
+        destroyProcess(response)
+        {
+            if ( response.data === 1 ) {
+                this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento eliminado");
+                this.initialize();
+            }
+        },
+
+        update()
+        {
+            console.log( { UPDATE_PARAMS: this.socialMedia } );
+            this.progress = true;
+            socialMediaApi.update( this.socialMedia )
+            .then( (response) => {
+                this.progress = false;
+                console.log( { UPDATE_RESPONSE: response } );
+                this.updateProcess(response);
+            })
+            .catch( (error) => {
+                this.progress = false;
+                console.log( { store_error: error } );
+        		this.$refs.messages.showAlertError( "Error", error.message);
+            });
+        },
+
+        updateProcess(response)
+        {
+            this.initialize();
+            this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento actualizado");
+        },
     },
 }
 </script>
