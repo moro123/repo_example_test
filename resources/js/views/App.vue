@@ -152,11 +152,11 @@ export default {
                         },
                         {
                             title : 'Noticias',
-                            link    : '/sections/19/-1',
+                            link    : '/noticias',
                         },
                         {
                             title : 'Eventos',
-                            link    : '/sections/20/-1',
+                            link    : '/eventos',
                         },
                     ]
                 },

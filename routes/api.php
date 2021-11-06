@@ -18,13 +18,13 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
+Route::post('sections/get-page','SectionController@getPage');
+
 
 Route::post('sections/get-main-section','MainSectionController@getMainSection');
 
 Route::post('sections/get-sections','SectionController@getSections');
 Route::post('sections/update-section','SectionController@updateSection');
-
-Route::post('sections/get-page','SectionController@getPage');
 
 Route::resource('sections','SectionController');
 
@@ -45,3 +45,5 @@ Route::resource('document','DocumentController');
 Route::post('document/get-documents', 'DocumentController@getDocuments');
 Route::post('document/update-document', 'DocumentController@updateDocument');
 
+Route::resource('event', 'EventController');
+Route::resource('notice', 'NoticeController');

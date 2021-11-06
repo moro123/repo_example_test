@@ -13,6 +13,13 @@ import Herramientas from '../views/Principal/Herramientas'
 import Folder from '../views/Sections/Folder'
 import Profile from '../views/Sections/Profile'
 
+import Eventos from '../views/NoticiasEventos/Eventos'
+import AgregarEvento from '../views/NoticiasEventos/AgregarEvento'
+import EditarEvento from '../views/NoticiasEventos/EditarEvento'
+
+
+import Noticias from '../views/NoticiasEventos/Noticias'
+
 
 Vue.use(VueRouter);
 
@@ -53,6 +60,26 @@ const router = new VueRouter({
 			path: '/profile/:profileId',
 			name: 'profile',
 			component: Profile
+		},
+		{
+			path: '/eventos',
+			name: 'eventos',
+			component: Eventos
+		},
+		{
+			path: '/agregar-evento',
+			name: 'agregarEvento',
+			component: AgregarEvento
+		},
+		{
+			path: '/editar-evento/:eventId',
+			name: 'editarEvento',
+			component: EditarEvento
+		},
+		{
+			path: '/noticias',
+			name: 'noticias',
+			component: Noticias
 		},
     ],
     

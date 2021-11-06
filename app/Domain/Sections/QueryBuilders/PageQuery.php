@@ -12,7 +12,11 @@ class PageQuery {
         $name = $request->get('name');
 
         $page = Page::where('name', $name)
-        ->with('main_sections.sections.allChildrenSections')
+        ->with(
+            'main_sections.sections.profiles.social_media',
+            'main_sections.sections.folders.documents',
+            'main_sections.sections.allChildrenSections',
+        )
         ->get();
 
         return $page;

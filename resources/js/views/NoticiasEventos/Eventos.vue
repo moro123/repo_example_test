@@ -1,6 +1,6 @@
 <template>
-    <div id="folder">
-
+    <div id="evento">
+        
         <messages ref="messages" :progress="progress"></messages>
 
         <v-data-table
@@ -11,13 +11,13 @@
 
             <template v-slot:top>
                     <v-toolbar flat>
-                        <v-toolbar-title> Documentos </v-toolbar-title>
+                        <v-toolbar-title> Eventos </v-toolbar-title>
                         <v-divider class="mx-4" inset vertical></v-divider>
                     <v-spacer></v-spacer>
                     <v-dialog v-model="dialog" max-width="500px">
                         <template v-slot:activator="{ on, attrs }">
-                        <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                            Agregar documento
+                        <v-btn color="primary" dark class="mb-2" to="agregar-evento">
+                            Agregar evento
                         </v-btn>
                         </template>
                         <v-card>
@@ -82,13 +82,13 @@
             </template>
             <template v-slot:item.actions="{ item }">
 
-                <v-btn fab small color="primary" @click="openDocument(item)" :elevation="3" class="mr-2" >
+                <!-- <v-btn fab small color="primary" @click="openDocument(item)" :elevation="3" class="mr-2" >
                     <v-icon>
                         mdi-arrow-right
                     </v-icon>
-                </v-btn>
+                </v-btn> -->
 
-                <v-btn fab small @click="editItem(item)" :elevation="3" class="mr-2">
+                <v-btn fab small :to=" '/editar-evento/' + item.id " :elevation="3" class="mr-2">
                     <v-icon small >
                         mdi-pencil
                     </v-icon>
@@ -113,16 +113,15 @@
 
 <script>
 import Messages from '../../messages/Messages.vue'
-import documentApi from '../../api/document.js'
+import eventApi from '../../api/event.js'
 import $ from 'jquery'
 
+
 export default {
-    components: {
-        Messages
-    },
+    components: { Messages },
     data() {
         return {
-            host: '',
+            
             progress: false,
             dialog: false,
             dialogDelete: false,
@@ -131,7 +130,7 @@ export default {
                     text: 'Nombre',
                     align: 'start',
                     sortable: true,
-                    value: 'name',
+                    value: 'title',
                 },
                 { text: 'Actiones', value: 'actions', sortable: false },
             ],
@@ -151,6 +150,16 @@ export default {
             ],
         }
     },
+
+    watch: {
+        dialog (val) {
+            val || this.close()
+        },
+        dialogDelete (val) {
+            val || this.closeDelete()
+        },
+    },
+
     computed: {
         formTitle () {
             return this.editedIndex === -1 ? 'Nuevo documento' : 'Editar documento'
@@ -168,109 +177,53 @@ export default {
                 ]
             }
         },
-        
-    },
-
-    watch: {
-        dialog (val) {
-            val || this.close()
-        },
-        dialogDelete (val) {
-            val || this.closeDelete()
-        },
-    },
-
-    created () {
-       this.host = $("#input-host").val() + "/";
     },
 
     mounted() {
-        this.folderId = this.$route.params.folderId;
         this.initialize();
     },
 
-    watch: {
-        editedItem(val) {
-            console.log( { editedItem: val } );
-        }
-    },
-
     methods: {
-        initialize () {
-            
+
+        initialize() {
             this.progress = true;
-            let data = {
-                folderId : this.folderId
-            }
-            
-            documentApi.getDocuments( data )
+
+            eventApi.index()
             .then( (response) => {
-                console.log( { DOCUMENTS_RESPOMNSE: response } );
                 this.progress = false;
+                console.log( { event_index_response: response.data } );
                 this.data = response.data;
             })
             .catch( (error) => {
-                console.log( error );
                 this.progress = false;
+                console.log( { event_index_response_error: error } );
             });
 
         },
 
-        store()
-        {
-            this.progress = true;
-            this.editedItem.folderId = this.folderId;
+        save() {
 
-            documentApi.store( this.editedItem )
-            .then( (response) => {
-                console.log( { DOCUMENT_STORE_RESPONSE: response } );
-                this.progress = false;
-                this.storeProcess(response);
-            })
-            .catch( (error) => {
-                console.log( error );
-                this.progress = false;
-               
-        		this.$refs.messages.showAlertError( error.title, error.message);
-            });
         },
 
-        storeProcess(response)
-        {
-            if ( response.data === 1 ) {
-                this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento agregado");
-                this.initialize();
-            }
+        closeDelete() {
+
         },
 
-        update()
-        {
-            console.log( "update()" );
-            console.log( { FOLDER: this.editedItem } );
-
-            this.progress = true;
-            documentApi.update( this.editedItem )
-            .then( (response) => {
-                this.progress = false;
-                console.log( { UPDATE_RESPONSE: response } );
-                this.updateProcess();
-            })
-            .catch( (error) => {
-                this.progress = false;
-                console.log( { UPDATE_ERROR: error } );
-            });
+        deleteItem (item) {
+            this.editedIndex = this.data.indexOf(item)
+            this.editedItem.id = item.id;
+            this.dialogDelete = true
         },
 
-        updateProcess()
-        {
-            this.initialize();
-            this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento actualizado");
+        deleteItemConfirm () {
+            this.destroy();
+            this.closeDelete()
         },
 
         destroy()
         {
             this.progress = true;
-            documentApi.destroy(this.editedItem.id)
+            eventApi.destroy(this.editedItem.id)
             .then( (response) => {
                 this.progress = false;
                 console.log( { DESTROY_RESPONSE: response.data } );
@@ -291,43 +244,12 @@ export default {
             }
         },
 
-        editItem (item) {
-            this.editedIndex = this.data.indexOf(item)
-            this.editedItem.id = item.id;
-            this.editedItem.name = item.name;
-            this.dialog = true
-        },
-
-        deleteItem (item) {
-            this.editedIndex = this.data.indexOf(item)
-            this.editedItem.id = item.id;
-            this.dialogDelete = true
-        },
-
-        deleteItemConfirm () {
-            this.destroy();
-            this.closeDelete()
-        },
-
-
         closeDelete () {
             this.dialogDelete = false
             this.$nextTick(() => {
                 this.editedItem = Object.assign({}, this.defaultItem)
                 this.editedIndex = -1
             })
-        },
-
-        save () {
-            if ( this.$refs.form.validate() ) {
-                if (this.editedIndex > -1) {
-                    this.update();
-                } else {
-                    this.store();
-                }
-                this.close();
-            }
-
         },
 
         close () {
@@ -338,20 +260,8 @@ export default {
             })
         },
 
-
-        openSection(item)
-        {
-            this.$router.push({
-                name: 'section', 
-                params: { item: item }
-            });
-        },
-
-        openDocument(item)
-        {
-            window.open( this.host + item.link , '_blank').focus();
-        }
-
-    },
+    }
 }
+
 </script>
+

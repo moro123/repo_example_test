@@ -1,15 +1,15 @@
 <?php 
-namespace App\Domain\Sections\Models;
+namespace App\Http\Models;
 use Illuminate\Database\Eloquent\Model;
 
-class Profile extends Model {
+class Notice extends Model {
 
     /**
      * The table associated with the model 
     *
     * @var string
     */
-    protected $table = 'profiles';
+    protected $table = 'notice';
 
     /**
      * Indicates if the model should be timestamped
@@ -24,16 +24,18 @@ class Profile extends Model {
     * @var array
     */
     protected $fillable = [
-        'name',
         'title',
+        'date',
+        'subtitle',
+        'content',
         'image',
-        'description',
-        'section_id'
+        'file',
+        'published'
     ];
 
-    public function social_media()
+    public function contacts()
     {
-        return $this->hasMany(SocialMedia::class, 'profiles_id', );
+        return $this->hasMany(Contact::class, 'notice_id', );
     }
 
     public function delete(){
@@ -41,10 +43,11 @@ class Profile extends Model {
 		{
 			try {
 			   unlink( $this->image );
+               unlink( $this->file );
 			} catch(\Exception $e) {
 			}
 	
-            $this->social_media()->delete();
+            
 			return parent::delete();
 		});
 	
