@@ -39,7 +39,7 @@ class NoticeController extends Controller
      */
     public function store(Request $request)
     {
-  
+        Log::info("NoticeController");
         Log::info("store()");
         Log::info( $request );
 
@@ -59,12 +59,14 @@ class NoticeController extends Controller
         
         $status = $notice->save();
 
+        
+
         $contact1 = new Contact();
         $contact1->title = $request->get('contact1')['title'];
         $contact1->name = $request->get('contact1')['name'];
         $contact1->phone = $request->get('contact1')['phone'];
         $contact1->email = $request->get('contact1')['email'];
-        $contact1->event_id = $notice->id;
+        $contact1->notice_id = $notice->id;
         $contact1->save();
 
         $contact2 = new Contact();
@@ -72,7 +74,7 @@ class NoticeController extends Controller
         $contact2->name = $request->get('contact2')['name'];
         $contact2->phone = $request->get('contact2')['phone'];
         $contact2->email = $request->get('contact2')['email'];
-        $contact2->event_id = $notice->id;
+        $contact2->notice_id = $notice->id;
         $contact2->save();
         
 
@@ -91,6 +93,9 @@ class NoticeController extends Controller
         ->with(['contacts'])
         ->get()
         ->first();
+
+        Log::info("show(): " . $id );
+        Log::info( json_encode( $notice ) );
 
         return $notice;
     }

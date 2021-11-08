@@ -19,6 +19,8 @@ import EditarEvento from '../views/NoticiasEventos/EditarEvento'
 
 
 import Noticias from '../views/NoticiasEventos/Noticias'
+import AgregarNoticia from '../views/NoticiasEventos/AgregarNoticia'
+import EditarNoticia from '../views/NoticiasEventos/EditarNoticia'
 
 
 Vue.use(VueRouter);
@@ -75,6 +77,16 @@ const router = new VueRouter({
 			path: '/editar-evento/:eventId',
 			name: 'editarEvento',
 			component: EditarEvento
+		},
+				{
+			path: '/agregar-noticia',
+			name: 'agregarNoticia',
+			component: AgregarNoticia
+		},
+		{
+			path: '/editar-noticia/:noticeId',
+			name: 'editarNoticia',
+			component: EditarNoticia
 		},
 		{
 			path: '/noticias',
