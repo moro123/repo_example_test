@@ -3,52 +3,6 @@
         
         <messages ref="messages" :progress="progress"></messages>
 
-        <h1> Portada de Eventos </h1>
-
-        <v-form ref="form_event">
-            <v-row>
-                <v-col cols="12" md="6">
-                    <v-text-field
-                        v-model="front.title"
-                        label="Titulo"
-                        :rules="rules"
-                    ></v-text-field>
-                </v-col>
-
-                <v-col cols="12" md="6">
-                    <v-text-field
-                        v-model="front.header"
-                        label="Enbezado"
-                        :rules="rules"
-                    ></v-text-field>
-                </v-col>
-            </v-row>
-
-            <v-row>
-                <v-col cols="12" md="6">
-                    <v-img contain :src="front.currentImage" width="320" height="240"> </v-img>
-                    <v-file-input
-                    @change="Preview_image"
-                    v-model="front.image"
-                    accept="image/*"
-                    label="Imagen"
-                    :rules="fileRules"
-                    ></v-file-input>
-                </v-col>
-            </v-row>
-
-            <br>
-            <v-btn
-                color="primary"
-                class="mr-4"
-                @click="storeFront()">
-                Guardar Portada
-            </v-btn>
-
-            <br><br>
-
-        </v-form>
-
         <v-data-table
             :headers="headers"
             :items="data"
@@ -57,13 +11,13 @@
 
             <template v-slot:top>
                     <v-toolbar flat>
-                        <v-toolbar-title> Eventos </v-toolbar-title>
+                        <v-toolbar-title> Posts </v-toolbar-title>
                         <v-divider class="mx-4" inset vertical></v-divider>
                     <v-spacer></v-spacer>
                     <v-dialog v-model="dialog" max-width="500px">
                         <template v-slot:activator="{ on, attrs }">
-                        <v-btn color="primary" dark class="mb-2" to="agregar-evento">
-                            Agregar evento
+                        <v-btn color="primary" dark class="mb-2" to="agregar-post">
+                            Crear publicación
                         </v-btn>
                         </template>
                         <v-card>
@@ -134,7 +88,7 @@
                     </v-icon>
                 </v-btn> -->
 
-                <v-btn fab small :to=" '/editar-evento/' + item.id " :elevation="3" class="mr-2">
+                <v-btn fab small :to=" '/editar-noticia/' + item.id " :elevation="3" class="mr-2">
                     <v-icon small >
                         mdi-pencil
                     </v-icon>
@@ -159,8 +113,7 @@
 
 <script>
 import Messages from '../../messages/Messages.vue'
-import eventApi from '../../api/event.js'
-import frontApi from '../../api/front.js'
+import postApi from '../../api/post.js'
 import $ from 'jquery'
 
 
@@ -168,13 +121,7 @@ export default {
     components: { Messages },
     data() {
         return {
-            host: '',
-            front: {
-                name: 'evento',
-                title: '',
-                header: '',
-                image: [],
-            },
+            
             progress: false,
             dialog: false,
             dialogDelete: false,
@@ -185,7 +132,7 @@ export default {
                     sortable: true,
                     value: 'title',
                 },
-                { text: 'Actiones', value: 'actions', sortable: false },
+                { text: 'Acciones', value: 'actions', sortable: false },
             ],
             data: [],
             desserts: [],
@@ -233,89 +180,24 @@ export default {
     },
 
     mounted() {
-        this.host = $("#input-host").val() + "/";
         this.initialize();
-        this.showFront();
     },
 
     methods: {
 
-        showFront() {
-            let data = {
-                name: 'evento'
-            }
-
-            frontApi.showFront(data)
-            .then( (response) => {
-                console.log( { front_response: response.data } );
-                this.setFront( response.data );
-
-            })
-            .catch( (error) => {
-                console.log( { error: error  } );
-            });
-
-        },
-
-        setFront(data) {
-
-            this.front.name = data.name;
-            this.front.title = data.title;
-            this.front.header = data.header;
-
-            this.front.currentImage = this.host + data.image;
-
-            console.log( { currentImage: this.front.currentImage } );
-
-        },
-
-        storeFront() {
-            console.log("Eventos storeFront()");
-            this.progress = true;
-            if ( this.$refs.form_event.validate()  ) {
-
-                frontApi.store( this.front )
-                .then( (response) => {
-                    this.progress = false;
-                    console.log( { response: response } );
-                    this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento agregado");
-                })
-                .catch( (error) => {
-                    this.progress = false;
-                    console.log( { erro: error } );
-                    this.$refs.messages.showAlertError("Error", error);
-                });
-
-            }
-
-        },
-
-        Preview_image() {
-            console.log("Preview_image()");
-            if ( this.front.image !== null ) {
-                if ( this.front.image !== []   ) {
-                    this.front.currentImage = URL.createObjectURL(this.front.image);
-                }
-            } else {
-                if ( this.front.oldimage !== [] ) {
-                    this.front.currentImage = this.front.oldImage;
-                }
-            }
-
-        },
-
         initialize() {
+            console.log("initialize() post");
             this.progress = true;
 
-            eventApi.index()
+            postApi.index()
             .then( (response) => {
                 this.progress = false;
-                console.log( { event_index_response: response.data } );
+                console.log( { response: response.data } );
                 this.data = response.data;
             })
             .catch( (error) => {
                 this.progress = false;
-                console.log( { event_index_response_error: error } );
+                console.log( { response_error: error } );
             });
 
         },
@@ -342,7 +224,7 @@ export default {
         destroy()
         {
             this.progress = true;
-            eventApi.destroy(this.editedItem.id)
+            noticeApi.destroy(this.editedItem.id)
             .then( (response) => {
                 this.progress = false;
                 console.log( { DESTROY_RESPONSE: response.data } );

@@ -22,6 +22,9 @@ import Noticias from '../views/NoticiasEventos/Noticias'
 import AgregarNoticia from '../views/NoticiasEventos/AgregarNoticia'
 import EditarNoticia from '../views/NoticiasEventos/EditarNoticia'
 
+import Posts from '../views/Blog/Posts.vue';
+import AgregarPost from '../views/Blog/AgregarPost.vue';
+
 
 Vue.use(VueRouter);
 
@@ -92,6 +95,16 @@ const router = new VueRouter({
 			path: '/noticias',
 			name: 'noticias',
 			component: Noticias
+		},
+		{
+			path: '/posts',
+			name: 'posts',
+			component: Posts
+		},
+		{
+			path: '/agregar-post',
+			name: 'agregarPost',
+			component: AgregarPost
 		},
     ],
     

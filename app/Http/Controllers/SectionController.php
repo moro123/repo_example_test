@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Domain\Sections\Services\SectionService;
 use App\Domain\Sections\Services\PageService;
+use App\Domain\Sections\Models\Section;
 use Log;
 
 class SectionController extends Controller
@@ -61,5 +62,17 @@ class SectionController extends Controller
     public function getPage(Request $request)
     {
         return $this->pageService->getPage($request);
+    }
+
+    public function getDocuments()
+    {
+        $sectionDocuments = Section::where('name', 'TRANSPARENCIA')
+        ->with([
+            'folders.documents'
+        ])
+        ->get()
+        ->first();
+
+        return $sectionDocuments;
     }
 }

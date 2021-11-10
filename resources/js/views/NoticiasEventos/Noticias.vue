@@ -1,7 +1,53 @@
 <template>
     <div id="evento">
-        
+
         <messages ref="messages" :progress="progress"></messages>
+
+        <h1> Portada de Noticias </h1>
+
+        <v-form ref="form_notice">
+            <v-row>
+                <v-col cols="12" md="6">
+                    <v-text-field
+                        v-model="front.title"
+                        label="Titulo"
+                        :rules="rules"
+                    ></v-text-field>
+                </v-col>
+
+                <v-col cols="12" md="6">
+                    <v-text-field
+                        v-model="front.header"
+                        label="Enbezado"
+                        :rules="rules"
+                    ></v-text-field>
+                </v-col>
+            </v-row>
+
+            <v-row>
+                <v-col cols="12" md="6">
+                    <v-img contain :src="front.currentImage" width="320" height="240"> </v-img>
+                    <v-file-input
+                    @change="Preview_image"
+                    v-model="front.image"
+                    accept="image/*"
+                    label="Imagen"
+                    :rules="fileRules"
+                    ></v-file-input>
+                </v-col>
+            </v-row>
+
+            <br>
+            <v-btn
+                color="primary"
+                class="mr-4"
+                @click="storeFront()">
+                Guardar Portada
+            </v-btn>
+
+            <br><br>
+
+        </v-form>
 
         <v-data-table
             :headers="headers"
@@ -114,6 +160,7 @@
 <script>
 import Messages from '../../messages/Messages.vue'
 import noticeApi from '../../api/notice.js'
+import frontApi from '../../api/front.js'
 import $ from 'jquery'
 
 
@@ -121,7 +168,13 @@ export default {
     components: { Messages },
     data() {
         return {
-            
+            host: '',
+            front: {
+                name: 'noticia',
+                title: '',
+                header: '',
+                image: [],
+            },
             progress: false,
             dialog: false,
             dialogDelete: false,
@@ -180,10 +233,73 @@ export default {
     },
 
     mounted() {
+        this.host = $("#input-host").val() + "/"; 
         this.initialize();
+        this.showFront();
     },
 
     methods: {
+
+        showFront() {
+            let data = {
+                name: 'noticia'
+            }
+
+            frontApi.showFront(data)
+            .then( (response) => {
+                console.log( { front_response: response.data } );
+                this.setFront( response.data );
+
+            })
+            .catch( (error) => {
+                console.log( { error: error  } );
+            });
+
+        },
+
+        setFront(data) {
+
+            this.front.name = data.name;
+            this.front.title = data.title;
+            this.front.header = data.header;
+
+            this.front.currentImage = this.host + data.image;
+        },
+
+        storeFront() {
+            console.log("storeFront()");
+            
+            if ( this.$refs.form_notice.validate()  ) {
+                this.progress = true;
+                frontApi.store( this.front )
+                .then( (response) => {
+                    this.progress = false;
+                    console.log( { response: response } );
+                    this.$refs.messages.showAlertSuccess("Transacción exitosa", "elemento agregado");
+                })
+                .catch( (error) => {
+                    this.progress = false;
+                    console.log( { erro: error } );
+                    this.$refs.messages.showAlertError("Error", error);
+                });
+
+            }
+
+        },
+
+        Preview_image() {
+            console.log("Preview_image()");
+            if ( this.front.image !== null ) {
+                if ( this.front.image !== []   ) {
+                    this.front.currentImage = URL.createObjectURL(this.front.image);
+                }
+            } else {
+                if ( this.front.oldimage !== [] ) {
+                    this.front.currentImage = this.front.oldImage;
+                }
+            }
+
+        },
 
         initialize() {
             this.progress = true;

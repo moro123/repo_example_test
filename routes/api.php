@@ -47,3 +47,17 @@ Route::post('document/update-document', 'DocumentController@updateDocument');
 
 Route::resource('event', 'EventController');
 Route::resource('notice', 'NoticeController');
+
+Route::get('get-events-notices', 'EventNoticeController@getEventNotice');
+
+Route::resource('post', 'PostController');
+Route::post('post/store-files', 'PostController@storeFiles');
+
+Route::post('show-front', 'FrontController@showFront');
+Route::post('store-front', 'FrontController@storeFront');
+
+Route::get('get-documents', 'SectionController@getDocuments');
+
+Route::post('get-notices-by-year', 'NoticeController@getNoticesByYear');
+
+

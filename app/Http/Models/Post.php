@@ -35,26 +35,23 @@ class Post extends Model {
         'updated_at'
     ];
 
-    public function contacts()
-    {
-        return $this->hasMany(Contact::class, 'event_id', );
-    }
+   
 
-    public function delete(){
-		$status = \DB::transaction(function()
-		{
-			try {
-			   unlink( $this->image );
-               unlink( $this->file );
-			} catch(\Exception $e) {
-			}
+    // public function delete(){
+	// 	$status = \DB::transaction(function()
+	// 	{
+	// 		try {
+	// 		   unlink( $this->image );
+    //            unlink( $this->file );
+	// 		} catch(\Exception $e) {
+	// 		}
 	
             
-			return parent::delete();
-		});
+	// 		return parent::delete();
+	// 	});
 	
-		return $status;
-	}
+	// 	return $status;
+	// }
 
 
 }

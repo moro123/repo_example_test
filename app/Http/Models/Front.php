@@ -2,21 +2,21 @@
 namespace App\Http\Models;
 use Illuminate\Database\Eloquent\Model;
 
-class Event extends Model {
+class Front extends Model {
 
     /**
      * The table associated with the model 
     *
     * @var string
     */
-    protected $table = 'event';
+    protected $table = 'front';
 
     /**
      * Indicates if the model should be timestamped
     *
     * @var bool
     */
-    public $timestamps = true;
+    public $timestamps = false;
 
     /**
      * The atributes that are mass assignable
@@ -24,30 +24,19 @@ class Event extends Model {
     * @var array
     */
     protected $fillable = [
+        'name',
         'title',
-        'date',
-        'subtitle',
-        'content',
+        'header',
         'image',
-        'file',
-        'published'
     ];
-
-    public function contacts()
-    {
-        return $this->hasMany(Contact::class, 'event_id', );
-    }
 
     public function delete(){
 		$status = \DB::transaction(function()
 		{
 			try {
 			   unlink( $this->image );
-               unlink( $this->file );
 			} catch(\Exception $e) {
 			}
-	
-            
 			return parent::delete();
 		});
 	

@@ -43,6 +43,7 @@
         "vue-owl-carousel": "^2.0.3",
         "vue-router": "^3.5.2",
         "vue3-smooth-scroll": "^0.8.1",
+        "vueditor": "^0.3.1",
         "vuelidate": "^0.7.6",
         "vuescroll": "^4.17.3",
         "vuetify": "^2.3.1",

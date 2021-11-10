@@ -51,7 +51,9 @@
                                         </v-list-item-icon>
                                         <v-list-item-title>{{ item.title }}</v-list-item-title>
                                     </v-list-item>
-                                </div>    
+                                </div>  
+
+                            </div>  
 
 
                             </div>
@@ -147,10 +149,6 @@ export default {
                     link: '',
                     subLinks : [
                         {
-                            title : 'Portada',
-                            link    : '/sections/18/-1',
-                        },
-                        {
                             title : 'Noticias',
                             link    : '/noticias',
                         },
@@ -179,6 +177,11 @@ export default {
                         },
                     ]
                 },
+                {
+                    icon: 'mdi-view-dashboard',
+                    title: 'Posts',
+                    link: '/posts'
+                },  
                 {
                     icon: 'mdi-logout-variant',
                     title: 'Salir',
