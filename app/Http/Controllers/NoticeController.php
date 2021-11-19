@@ -17,8 +17,7 @@ class NoticeController extends Controller
     }
 
     public function create()
-    {
-        
+    {          
     }
 
     public function store(Request $request)
@@ -43,7 +42,7 @@ class NoticeController extends Controller
         
         $status = $notice->save();
 
-        
+        Log::info("Notice stored: ". json_encode( $notice ) );
 
         $contact1 = new Contact();
         $contact1->title = $request->get('contact1')['title'];
@@ -61,7 +60,6 @@ class NoticeController extends Controller
         $contact2->notice_id = $notice->id;
         $contact2->save();
         
-
         return $status;
     }
 
@@ -81,7 +79,6 @@ class NoticeController extends Controller
 
     public function edit($id)
     {
-        //
     }
 
     public function update(Request $request, $id)

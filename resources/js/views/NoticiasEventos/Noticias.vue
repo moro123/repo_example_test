@@ -170,6 +170,7 @@ export default {
         return {
             host: '',
             front: {
+                id: -1,
                 name: 'noticia',
                 title: '',
                 header: '',
@@ -201,6 +202,7 @@ export default {
             rules: [
                 v => !!v || 'Este campo es requerido',
             ],
+            
         }
     },
 
@@ -219,7 +221,7 @@ export default {
         },
 
         fileRules(){
-            if ( this.editedIndex === -1 ) {
+            if ( this.front.id === -1 ) {
                 return [
                     v => !!v || 'El documento es requerido',
                     v => v.size > 0 || 'El documento es requerido',
@@ -258,12 +260,13 @@ export default {
         },
 
         setFront(data) {
-
-            this.front.name = data.name;
-            this.front.title = data.title;
-            this.front.header = data.header;
-
-            this.front.currentImage = this.host + data.image;
+            if ( data !== '' ) {
+                this.front.id = data.id;
+                this.front.name = data.name;
+                this.front.title = data.title;
+                this.front.header = data.header;
+                this.front.currentImage = this.host + data.image;
+            }
         },
 
         storeFront() {
@@ -279,7 +282,7 @@ export default {
                 })
                 .catch( (error) => {
                     this.progress = false;
-                    console.log( { erro: error } );
+                    console.log( { error: error } );
                     this.$refs.messages.showAlertError("Error", error);
                 });
 

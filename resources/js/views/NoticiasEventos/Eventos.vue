@@ -170,6 +170,7 @@ export default {
         return {
             host: '',
             front: {
+                id: -1,
                 name: 'evento',
                 title: '',
                 header: '',
@@ -219,7 +220,7 @@ export default {
         },
 
         fileRules(){
-            if ( this.editedIndex === -1 ) {
+            if ( this.front.id === -1 ) {
                 return [
                     v => !!v || 'El documento es requerido',
                     v => v.size > 0 || 'El documento es requerido',
@@ -256,24 +257,22 @@ export default {
             });
 
         },
-
+        
         setFront(data) {
-
-            this.front.name = data.name;
-            this.front.title = data.title;
-            this.front.header = data.header;
-
-            this.front.currentImage = this.host + data.image;
-
-            console.log( { currentImage: this.front.currentImage } );
-
+            if ( data !== '' ) {
+                this.front.id = data.id;
+                this.front.name = data.name;
+                this.front.title = data.title;
+                this.front.header = data.header;
+                this.front.currentImage = this.host + data.image;
+            }
         },
 
         storeFront() {
             console.log("Eventos storeFront()");
-            this.progress = true;
+            
             if ( this.$refs.form_event.validate()  ) {
-
+                this.progress = true;
                 frontApi.store( this.front )
                 .then( (response) => {
                     this.progress = false;

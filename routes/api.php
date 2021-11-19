@@ -58,6 +58,16 @@ Route::post('store-front', 'FrontController@storeFront');
 
 Route::get('get-documents', 'SectionController@getDocuments');
 
-Route::post('get-notices-by-year', 'NoticeController@getNoticesByYear');
+Route::post('get-front', 'EventNoticeController@getFront');
+Route::post('get-notices', 'EventNoticeController@getNotices');
+Route::post('get-events', 'EventNoticeController@getEvents');
+
+Route::post('get-notice-filter', 'EventNoticeController@getNoticeFilter');
+Route::post('get-event-filter', 'EventNoticeController@getEventFilter');
+
+Route::post('get-notice', 'EventNoticeController@getNotice');
+Route::post('get-event', 'EventNoticeController@getEvent');
+
+Route::post('get-events-by-year', 'EventNoticeController@getEventsByYear');
 
 
